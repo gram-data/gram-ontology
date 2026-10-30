@@ -9,7 +9,7 @@ gram-ontology's design is worked out in the open, in documents, before and along
 
 Later layers (a concrete elaboration of one candidate framing, an architecture decision record, time-boxed spikes) can be added the same way when there is something for them to hold. Each is a directory under `design/` with its own README and index.
 
-Working notes that are not yet documents of either kind live in [`../notes/`](../notes/): the [extension design notes](../notes/extension-design.md) and the [structural ontology notes](../notes/structural-ontology-notes.md) that motivate the model.
+The two current Explorations are [EXP-001, structural ontologies for a multi-graph space](exploration/EXP-001-structural-ontologies.md), and [EXP-002, ontology tooling over the gram syntax tree](exploration/EXP-002-ontology-tooling-over-the-cst.md).
 
 ## Tooling
 
@@ -22,4 +22,4 @@ They keep each directory's index table in sync, so do not hand-edit those tables
 
 ## Where to start
 
-The model comes first: the shape of a valid `*.ontology.gram` file is the source of truth, and JSON is only one serialization of it. A first Exploration of that shape, starting from the structural notes (frames, spans, layering informal semantics before tightening boundaries), is the natural opening move.
+The model comes first: the shape of a valid `*.ontology.gram` file is the source of truth, and JSON is only one serialization of it. EXP-001 starts from structural ideas (spans, layering informal semantics before tightening boundaries) that bear on that shape, and EXP-002 covers where the tooling sits. An RFC on the shape itself is the natural next document.

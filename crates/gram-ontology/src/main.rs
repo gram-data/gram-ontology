@@ -152,7 +152,8 @@ fn collect_parse_errors(node: Node, out: &mut Vec<Diagnostic>) {
 }
 
 /// A file opts in with both the `*.ontology.gram` name and `kind: ontology` in the top-level
-/// record. What to do when they disagree is an open question in `notes/extension-design.md`;
+/// record. What to do when they disagree is an open question in
+/// `design/exploration/EXP-002-ontology-tooling-over-the-cst.md`;
 /// for now any mismatch is a warning.
 fn check_opt_in(path: &Path, source: &str, tree: &Tree, out: &mut Vec<Diagnostic>) {
     let by_name = path

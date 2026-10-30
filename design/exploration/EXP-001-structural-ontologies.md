@@ -1,15 +1,73 @@
-# Structural Ontologies Notes
+---
+id: EXP-001
+title: Structural Ontologies for a Multi-Graph Space
+status: exploring
+created: 2026-10-30
+---
 
-In practice, AI-era property graphs are composed of multiple graphs which are different in kind and formality,
-from unstructured data to structured data, across different domains, at different scales from millions of small memory graphs to monolithic enterprise graphs, and projecting out to external data sources that are viewed as graphs. 
+# EXP-001: Structural Ontologies for a Multi-Graph Space
 
-AI-era property graphs are already a multi-graph space.
+## 1. Starting Point
 
-This is by convention. The following discussion explores a formalization that features modularity and composability, with local variance and global coherence. Inspiration comes from topos theory, and entity-component-systems. Philosophically, it adopts the stance that form precedes function, that structure precedes semantics. All this starts with the observation that the power of a graph model is externalizing relationships from nodes. That's natural in the math (nodes don't know about relationships), but awkward in an object oriented approach. The benefit is easy extensibility, adaptability, and accommodation for multiple simultaneous viewpints. 
+Property graphs used with AI systems are, in practice, collections of graphs that differ in kind and formality: unstructured and structured data, many domains, and scales from millions of small memory graphs to monolithic enterprise graphs, with external data sources projected in and viewed as graphs. That is already a multi-graph space, by convention. What would it mean to formalize it so that it stays modular and composable, with local variance and global coherence?
 
-The goal is to formally describe a graph of graphs with both graph-level and element level relationships.
+The stance taken here is that form precedes function: structure comes before semantics. It starts from one observation. The power of a graph model is that relationships are externalized from nodes. That is natural in the mathematics, where nodes do not know about relationships, and awkward in an object-oriented approach. The payoff is easy extensibility, adaptability, and room for several simultaneous viewpoints.
 
-The following is copied from a chat with Gemini...
+The aim is to describe formally a graph of graphs, with both graph-level and element-level relationships.
+
+## 2. Landscape
+
+Ontologies usually start with strict formalism and then leave gaps for informal conventions and unknown additions, which is how they stay flexible. The multi-graph space suggests the reverse: let data exist structurally first, then classify it, and treat informal semantics (descriptions, definitions, tags) as attachable information rather than as rigid types. Entity-component-system designs work this way: an entity is a bare identity, and components attached to it carry data and meaning.
+
+Topos theory and applied category theory offer vocabulary for composing graphs without forcing a single global schema. The framings below are drawn from a conversation with a language model (the full text is in the source appendix) and are recorded as candidate vocabulary, not as verified mathematics.
+
+## 3. Divergent Framings
+
+### 3.1 Colimits and pushouts: gluing graphs along an interface
+
+Two domain graphs, say finance and HR, share a sub-graph of common identifiers, the interface graph. Maps from the interface into each domain define a pushout: the unified multi-graph that stitches the domains together along exactly that boundary, without duplicating shared data. This is the weakest and most purely structural form. It promises lossless, deterministic schema merging, and says exactly how a change in one domain propagates or stays local.
+
+### 3.2 Monoidal categories and operads: sub-graphs as boxes with ports
+
+A subdomain is a box with exposed ports (nodes or edges meant for external connection), and wiring boxes together is an operad algebra. Composition is associative, so composing A with B and then adding C gives the same result in any order. This is the behavioral form: subdomains behave as black boxes that can be refactored as long as their exposed interfaces hold.
+
+### 3.3 Presheaves and topoi over preorders: local views and partial truth
+
+A property graph is modeled as a presheaf from a small category of entity and relationship types to sets. If subdomains are ordered hierarchically or by access level, the underlying structure is a preorder, and a presheaf on it gives each subdomain a local view. The topos structure supplies a generalized truth: a relationship can be true in one subdomain, unknown in another, and globally restricted. This is the logical form, aimed at queries across subdomains and at partial views and access control.
+
+### 3.4 Spans of graph homomorphisms: graphs as objects, a relationship graph between them
+
+Autonomous domain graphs are the outer objects. A bridge graph, the span, contains only relationships connecting nodes of the spanned graphs, and homomorphisms from the bridge into each domain align them. Domains keep full internal variance and do not know about each other. The span holds identity resolution. A global federated view arises by composing spans with a pullback, so overlaps are computed where spans meet and domain-specific attributes ride along without causing schema conflicts. Three rules were proposed: bridge nodes are abstract identity aliases, domain-specific logic stays out of the bridge, and the bridge enforces structural integrity when a domain element is removed.
+
+### 3.5 The ECS inversion with layered semantics
+
+The graph is a superstructure. Nodes are anonymous identities. Properties, tags, and informal descriptions are components attached to them, and spans act as the systems that relate them across boundaries. Semantics then layers on gradually: informal annotations first (a description on a span edge saying what a loose match means), then informal types that emerge from usage, then tightened boundaries enforced where a span meets a domain, so that domains stay messy and the bridge becomes a validated checkpoint. In categorical terms, semantics is a mapping from raw structure to a category of meanings, which can be swapped or tightened without rewriting the graph.
+
+## 4. Tensions
+
+- **Who owns identity.** The span could hold identity resolution (the answer given in the source conversation), or domains could share an identifier layer such as an enterprise ID.
+- **Strict first or structure first.** Traditional ontologies formalize first and patch in informal conventions. The structure-first framings do the opposite, and the two disagree about what a "valid" element is before any semantics is attached.
+- **A semantics-free bridge versus relationships that need assertions.** Keeping the bridge free of business logic conflicts with relationships that carry real properties.
+- **Where to tighten.** Constraints can sit at the span interface (3.4, 3.5) or inside each domain (the usual schema approach). These place the boundary of responsibility in different places.
+- **Vocabulary versus buildability.** 3.1 to 3.3 give precise language but no obvious path to an implementation. 3.4 and 3.5 are closer to something buildable but lean on that language loosely.
+
+## 5. Directions Worth Pursuing
+
+The working direction combines 3.4 and 3.5: graphs as objects, spans as the relationship graphs between them, informal semantics attached as components, and boundaries tightened at the spans over time. Pushouts (3.1) are a candidate operation for composing, and the topos logic (3.3) is a candidate for partial views later. None of this commits to a formal framework.
+
+## 6. Disposition
+
+Candidate RFC, not yet written: what a valid gram ontology looks like in a multi-graph space, in terms of graphs, spans, and layered semantics. Nothing here is decided. A concrete elaboration of the span-and-layering framing would show what it looks like in practice.
+
+## 7. Appendix: References
+
+- AlgebraicJulia, and categorical databases as developed by David Spivak and collaborators: computational systems that use presheaves and colimits to migrate, merge, and split schemas.
+- The Neo4j ontology-graph-spec, a JSON/YAML format for graph descriptions with `description`, `aliases`, and `reference`. It is a lower bound for what an ontology here needs to cover, and it lacks features a multi-graph space needs, such as spans.
+- A version of the frame/span approach is being explored in pattern-hs.
+
+## 8. Appendix: Source Material
+
+The framings in section 3 and the layering strategy in 3.5 come from the following chat with a language model, kept here verbatim. Provenance: this text first appeared in `structural-ontology-notes.md` under `proposals/` in relateby/pattern-rs. Treat it as raw material, not as verified mathematics.
 
 ---
 

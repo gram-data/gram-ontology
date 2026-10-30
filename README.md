@@ -13,8 +13,7 @@ cargo run -p gram-ontology -- check examples/pattern-rs-spike/movies.ontology.gr
 | Path | Contents |
 |---|---|
 | `crates/gram-ontology/` | The `gram-ontology` binary |
-| `design/` | Design documents: [Explorations and RFCs](design/README.md) |
-| `notes/` | [Extension design notes](notes/extension-design.md) and the [structural ontology notes](notes/structural-ontology-notes.md) behind the model |
+| `design/` | Design documents: [Explorations and RFCs](design/README.md), including [EXP-001](design/exploration/EXP-001-structural-ontologies.md) and [EXP-002](design/exploration/EXP-002-ontology-tooling-over-the-cst.md) |
 | `examples/` | Seed fixtures, see [`examples/README.md`](examples/README.md) |
 | `.claude/skills/` | `/exploration-create`, `/exploration-review`, `/rfc-create`, `/rfc-review` |
 | `.github/workflows/` | CI, and the release workflow that builds the registry-style artifacts |
