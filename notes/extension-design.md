@@ -53,4 +53,5 @@ Doc comments attach to elements by adjacency; the proposed rules are in the gram
 - Define the ontology model (the shape of a valid `*.ontology.gram`), informed by the structural notes (frames, spans, layering informal semantics before tightening boundaries).
 - Opt-in mismatch behavior.
 - The `gram` extension registry (`registry.toml`) does not exist yet. `gram extension install` fetches it from tree-sitter-gram's `main`, which currently returns 404. Where it should live, avoiding circular dependencies, is the next task.
-- Project layout, crate structure, release packaging (artifact naming per the registry contract).
+- Project layout is a skeleton so far: a Cargo workspace with one `gram-ontology` binary crate that depends on the published `tree-sitter-gram`, `tree-sitter-gramdoc` and `gram-diagnostics` crates. The release workflow is hand-written (not cargo-dist) so artifact names match the registry contract exactly, and it has not yet been run.
+- The design process (Explorations and RFCs, with skills to create and review them) is borrowed from another project and lives in `design/`. The model itself has no Exploration or RFC yet.

@@ -1,0 +1,25 @@
+[package]
+name = "gram-ontology"
+version.workspace = true
+license.workspace = true
+repository.workspace = true
+edition.workspace = true
+description = "gram CLI extension: strict checks and export for *.ontology.gram files"
+publish = false
+
+[[bin]]
+name = "gram-ontology"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+serde_json = "1"
+gram-diagnostics = "0.4"
+tree-sitter = "0.26"
+tree-sitter-gram = "0.4"
+tree-sitter-gramdoc = "0.2"
+
+[dev-dependencies]
+assert_cmd = "2"
+predicates = "3"
+tempfile = "3"
