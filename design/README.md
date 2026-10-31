@@ -22,4 +22,4 @@ They keep each directory's index table in sync, so do not hand-edit those tables
 
 ## Where to start
 
-The model comes first: the shape of a valid `*.ontology.gram` file is the source of truth, and JSON is only one serialization of it. EXP-001 starts from structural ideas (spans, layering informal semantics before tightening boundaries) that bear on that shape, and EXP-002 covers where the tooling sits. An RFC on the shape itself is the natural next document.
+The model comes first: the shape of a valid `*.ontology.gram` file is the source of truth, and JSON is only one serialization of it. `kind` will eventually be associated with a gram schema, and this project is one of the hand-built kinds that schema is distilled from. EXP-001 starts from structural ideas (spans, layering informal semantics before tightening boundaries) that bear on that shape, and EXP-002 covers where the tooling sits. An RFC on the shape itself is the natural next document.

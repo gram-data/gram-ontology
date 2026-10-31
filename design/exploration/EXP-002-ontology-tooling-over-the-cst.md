@@ -23,7 +23,7 @@ The Neo4j ontology-graph-spec covers `description`, `aliases`, `reference`, and 
 
 ### 3.1 A profile over the CST
 
-A conforming file is ordinary, valid gram with extra requirements. A `gram ontology` extension adds syntactic requirements (for example a canonical form for relationships) and semantic requirements (every relationship documents `@source` and `@target`, `@property` names exist on the documented element, cardinalities are consistent, `@self` only where both ends are the same node), and still produces the normal CST, so highlighting, the language server, and generic checking keep working on ontology files. A file opts in with both the `*.ontology.gram` name and `kind: ontology` in the top-level record. Rules are delivered as a mix: tree-sitter queries for syntactic rules and Rust for rules that must read the host tree and the injected gramdoc tree together. Export is JSON of the complete ontology, plus a lossy export to the ontology-graph-spec.
+A conforming file is ordinary, valid gram with extra requirements. A `gram ontology` extension adds syntactic requirements (for example a canonical form for relationships) and semantic requirements (every relationship documents `@source` and `@target`, `@property` names exist on the documented element, cardinalities are consistent, `@self` only where both ends are the same node), and still produces the normal CST, so highlighting, the language server, and generic checking keep working on ontology files. A file opts in with both the `*.ontology.gram` name and `kind: ontology` in the top-level record. The `kind` is also the hook for a future gram schema (see section 5). For now, rules are delivered as a mix: tree-sitter queries for syntactic rules and Rust for rules that must read the host tree and the injected gramdoc tree together. Export is JSON of the complete ontology, plus a lossy export to the ontology-graph-spec.
 
 ### 3.2 A library over the generic pattern
 
@@ -44,8 +44,9 @@ Ontology files get their own grammar, one member of a family of specialized gram
 
 3.1 is the working direction. It keeps one base tree, adds no new syntax, and fits the existing extension mechanism. Within it:
 
-- The shape of a valid `*.ontology.gram` file is the source of truth. JSON, including any JSON Schema, is a serialization of that shape, never the contract. Gram has no schema definition language yet, so defining the shape is itself part of the work.
-- Syntactic rules as queries and semantic rules as Rust.
+- The shape of a valid `*.ontology.gram` file is the source of truth. JSON, including any JSON Schema, is a serialization of that shape, never the contract.
+- Gram will eventually have its own schema definition, associated with a `kind`, that captures the conventions and semantics this project has to enforce in code and queries today. A file therefore does not name a schema in its top-level record: `kind` is the association. A few kinds of gram will be worked out by hand first, and ontology is the first; a gram schema is distilled from those.
+- Until then, syntactic rules as queries and semantic rules as Rust, written so that they can later be distilled into a schema. They are the hand-built version of that schema, not a competing mechanism.
 - Diagnostics in the same JSON format `gram check` already emits.
 
 3.3 is kept in reserve for a domain whose syntax genuinely cannot be valid gram.
@@ -57,8 +58,7 @@ Candidate RFC, not yet written: the ontology profile over the gram CST, includin
 - Define the model, using EXP-001 as a starting point.
 - What happens when the filename and `kind: ontology` disagree. A warning on any mismatch is the current leaning, and the skeleton already does that.
 - Which attachment rules for doc comments to adopt (adjacency, as proposed for gramdoc).
-- The `gram` extension registry now exists as its own repository, and an entry for this extension can be added once there is a release.
-- The `gram extension install` path currently requests Linux and Windows artifact names that the first-party extension does not publish.
+- Which conventions belong to `kind: ontology` and which are general gram, since the former is what a gram schema will eventually carry.
 
 ## 7. Appendix: References
 

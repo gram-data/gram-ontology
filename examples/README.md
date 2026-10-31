@@ -9,4 +9,6 @@ Verbatim copies of the files from the ontology spike on the `spike/ontology-grap
 - `movies.yaml`: the spec's example, for comparison.
 - `README.md`: the spike's own notes.
 
+The `movies.ontology.gram` header also carries a `schema` field that points at the ontology-graph-spec's JSON Schema. That is a mistake and not a convention to follow: once gram has a schema definition, `kind` is what associates a file with it, so a file does not name a schema. The file is left verbatim as provenance.
+
 They are exploratory and may not match the model this project settles on. Both `.ontology.gram` files parse with tree-sitter-gram with no errors, and the integration tests in `crates/gram-ontology/tests/` run `gram-ontology check` against them.
