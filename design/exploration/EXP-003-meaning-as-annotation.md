@@ -94,7 +94,7 @@ The doc comment is authoring syntax, and the model is a `Doc` pattern as in 3.2.
 - **One namespace for two kinds of key.** In a `Doc` record, the `Doc`'s own fields and the names of the documented element's properties share the key space. The `@` prefix separates them in a record (3.2) and cannot be used in annotation syntax (3.3). Without a convention, a property named `description` or `language` cannot be documented.
 - **Addressing a property.** Properties have no identity. A comment names one with a tag (3.1), a record entry keyed by its name addresses it (3.2), and an annotation can do the same only by key (3.3). A separate `Doc` pattern per property would address it uniformly but costs verbosity.
 - **How much structure fits per property.** A per-property map can hold scalars and arrays of scalars, so a description, a localized term, a reference, and a list of aliases fit. Anything deeper needs another pattern.
-- **Where the language lives.** On each comment or `Doc`, as a qualifying field, so a reader can pick the `Doc`s in the language or for the audience they want. Which fields qualify a `Doc` this way (`@language`, and perhaps an audience) is open.
+- **Where the language lives.** On each comment or `Doc`, as a qualifying field, so a reader can pick the `Doc`s in the language they want. Beyond `@language` the convention is deliberately left open: a doc comment keeps tags it does not know, and a `Doc` record can carry further `@`-prefixed fields, so an author who needs to tell `Doc`s apart by audience, version, or anything else can evolve their own convention.
 - **Where an identity comes from.** A `Doc` the author writes at top level carries one, chosen by the author. A `Doc` produced from a comment carries none and sits inline in each graph that contains the documented element. The open edge: a comment on an element that no graph contains produces a `Doc` in no graph, which is the orphan case.
 - **Inline `Doc`s.** An identity is needed only to be named from elsewhere. A `Doc` written inline among a containing graph's elements needs none, so it can stay anonymous there. At the top level, an anonymous `Doc` is a warning, since nothing can name it.
 - **Where the rules are checked.** The content of a comment is checked by a comment grammar, and the content of a record by whatever describes records of this kind. 3.4 puts both in play for one piece of meaning.
@@ -109,7 +109,7 @@ The doc comment is authoring syntax, and the model is a `Doc` pattern as in 3.2.
 - **The graph is the context.** A graph that holds the French and English `Doc`s of an element already groups them, and a separate audience can have a separate graph over the same elements, so no extra grouping construct is needed.
 - **Orphans.** A top-level node, relationship, or annotation not referenced from within any `Graph` is orphaned, and an orphan is a warning.
 
-Not settled: the exact desugaring, which fields let a reader select `Doc`s, and how a property is addressed (map entry or separate pattern); a revision of any of them could change which framing leads.
+Underspecified on purpose: beyond `@language`, how `Doc`s are told apart is left to authors, since unknown tags and fields are kept. Not settled: the exact desugaring and how a property is addressed (map entry or separate pattern); a revision of any of them could change which framing leads.
 
 ## 6. Disposition
 
@@ -119,7 +119,7 @@ Candidate RFC, not yet written: the shape of a documentation pattern (`Doc`): it
 - Where a comment's `Doc` is produced: inline in each graph that contains the documented element, with nothing minted.
 - The orphan rule: a top-level node, relationship, or annotation not referenced from within a `Graph` is a warning, and an anonymous top-level `Doc` is a warning. These are rules for the ontology profile to check (they join the semantic requirements listed in EXP-002), and they apply to every kind of top-level pattern, not only to documentation.
 - Property addressing: map entries, or one `Doc` per property.
-- Which fields qualify a `Doc` for selection by a reader: `@language`, and whether others (an audience, say) are conventional.
+- `@language` as the one conventional qualifying field. Other qualifiers are left to authors, who can add unknown tags or `@`-prefixed fields.
 
 ## 7. References
 
