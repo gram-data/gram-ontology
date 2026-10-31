@@ -33,16 +33,11 @@ Ontology semantics are interpreted after parsing, from the generic pattern struc
 
 Ontology files get their own grammar, one member of a family of specialized gram grammars, each parsing into a generic pattern but with domain objects on top. Syntax can be tailored exactly. The cost is a second grammar to maintain, and ontology files stop being plain gram unless the new grammar is a strict subset.
 
-### 3.4 JSON first, gram as a rendering
-
-The ontology model is defined as a JSON Schema, and `*.ontology.gram` is one way to write instances of it. Tooling for JSON is mature and the ontology-graph-spec already takes this shape. The cost is that the model inherits an object-oriented shape: it nests meaning inside elements, where a graph model would attach it from outside, and the gram form becomes a translation of something not native to graphs.
-
 ## 4. Tensions
 
 - **Where strictness lives.** 3.1 keeps the language open and puts strictness in a checker. 3.3 puts strictness in the grammar. They disagree about whether an invalid ontology should be a syntax error or a diagnostic.
 - **Which tree carries documentation.** The CST keeps comments, and the pattern layer does not today. 3.1 and 3.2 disagree about whether meaning is read before or after normalization.
 - **Two syntactic forms.** gram expresses a relationship as `(a)-[:R]->(b)` or as `[:R | a, b]`. Working on the CST means handling both or requiring a canonical form. Working on patterns means handling neither.
-- **Model first or serialization first.** 3.4 starts from a JSON shape. The alternatives start from the shape of a valid gram file and treat JSON as one serialization of it.
 - **Coverage.** The ontology-graph-spec is a floor, and multi-graph framings such as spans between graphs and layered semantics are outside it, so a model shaped to the spec alone may not hold them.
 
 ## 5. Directions Worth Pursuing
@@ -53,7 +48,7 @@ The ontology model is defined as a JSON Schema, and `*.ontology.gram` is one way
 - Syntactic rules as queries and semantic rules as Rust.
 - Diagnostics in the same JSON format `gram check` already emits.
 
-3.4 as the primary model is not pursued. 3.3 is kept in reserve for a domain whose syntax genuinely cannot be valid gram.
+3.3 is kept in reserve for a domain whose syntax genuinely cannot be valid gram.
 
 ## 6. Disposition
 
