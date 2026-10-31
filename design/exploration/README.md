@@ -50,4 +50,4 @@ Use `/exploration-review` when deciding whether a draft is ready to move from `e
 |---|---|---|
 | [EXP-001](EXP-001-structural-ontologies.md) | Structural Ontologies for a Multi-Graph Space | exploring |
 | [EXP-002](EXP-002-ontology-tooling-over-the-cst.md) | Ontology Tooling over the gram Syntax Tree | exploring |
-| [EXP-003](EXP-003-meaning-as-annotation.md) | Meaning as Annotation | exploring |
+| [EXP-003](EXP-003-meaning-as-annotation.md) | Meaning and Structure as Annotation | exploring |
