@@ -16,3 +16,22 @@
 [:French {
       name: "nom"
 } | Person ]
+
+/**
+ * Un être humain.
+ *
+ * @language "fr"
+ * @property name "nom" Le nom complet de la personne.
+ */
+ (Person)
+
+[:Doc {
+    `@language`: "fr",
+    `@description`: "Un être humain.",
+    `@aliases`: ["Personne"],
+    name: {
+        term: "nom",
+        description: "Le nom complet de la personne.",
+        aliases: ["anon"]
+    }
+} | (Person)]
