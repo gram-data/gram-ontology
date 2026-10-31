@@ -88,46 +88,38 @@ The identified annotation gives the `Doc` an identity and a label, and the value
 
 The doc comment is authoring syntax, and the model is a `Doc` pattern as in 3.2. Reading a comment produces the pattern: `@language "fr"` applies to the whole comment; the free text is the description; each `@property` tag contributes a per-property entry, with an optional quoted localized term after the key. Writing 3.1's French comment and 3.2's pattern then mean the same thing, and the comment form is the comfortable way to type it. A comment names no identity for the `Doc` it produces, and none is needed: the reading puts the `Doc` inline among the elements of each graph that contains the documented element, where an inline member needs no identity. Identities are not minted. The cost is that the desugaring has to be defined exactly, and that an author can edit the comment and the pattern out of step if both exist in one file.
 
-### 3.5 Meaning as a layer: glossaries
-
-Meaning is kept in a layer apart from the elements, and groups of meanings form contexts. An element knows nothing of its documentation, and a glossary names the `Doc` patterns that apply together.
-
-```gram
-[person-fr:Doc {
-  `@language`: "fr",
-  `@description`: "Un être humain."
-} | (person)]
-
-[french:Glossary {`@language`: "fr"} | person-fr]
-```
-
-A language or audience is then one glossary, and swapping or adding one edits nothing else. The `Doc` needs an identity so that the glossary can name it, and the language is stated on the glossary, on each `Doc`, or both.
-
 ## 4. Tensions
 
 - **Comfort versus survival as data.** 3.1 is the easiest to write and the only one that vanishes in a plain pattern parse. 3.2 and 3.3 survive and are awkward. 3.4 tries to have both, at the price of a defined desugaring.
 - **One namespace for two kinds of key.** In a `Doc` record, the `Doc`'s own fields and the names of the documented element's properties share the key space. The `@` prefix separates them in a record (3.2) and cannot be used in annotation syntax (3.3). Without a convention, a property named `description` or `language` cannot be documented.
 - **Addressing a property.** Properties have no identity. A comment names one with a tag (3.1), a record entry keyed by its name addresses it (3.2), and an annotation can do the same only by key (3.3). A separate `Doc` pattern per property would address it uniformly but costs verbosity.
 - **How much structure fits per property.** A per-property map can hold scalars and arrays of scalars, so a description, a localized term, a reference, and a list of aliases fit. Anything deeper needs another pattern.
-- **Where the language lives.** On each comment or `Doc` (3.1, 3.2, 3.3), or on a context that groups them (3.5). The first is local and repeats; the second adds a layer and an identity.
-- **Where an identity comes from.** A `Doc` the author writes at top level carries one, chosen by the author. A `Doc` produced from a comment carries none and sits inline in each graph that contains the documented element. The open edges: a glossary (3.5) names `Doc`s by identity, so it cannot reach inline ones and would have to select by language instead; and a comment on an element that no graph contains produces a `Doc` in no graph, which is the orphan case.
+- **Where the language lives.** On each comment or `Doc`, as a qualifying field, so a reader can pick the `Doc`s in the language or for the audience they want. Which fields qualify a `Doc` this way (`@language`, and perhaps an audience) is open.
+- **Where an identity comes from.** A `Doc` the author writes at top level carries one, chosen by the author. A `Doc` produced from a comment carries none and sits inline in each graph that contains the documented element. The open edge: a comment on an element that no graph contains produces a `Doc` in no graph, which is the orphan case.
 - **Inline `Doc`s.** An identity is needed only to be named from elsewhere. A `Doc` written inline among a containing graph's elements needs none, so it can stay anonymous there. At the top level, an anonymous `Doc` is a warning, since nothing can name it.
 - **Where the rules are checked.** The content of a comment is checked by a comment grammar, and the content of a record by whatever describes records of this kind. 3.4 puts both in play for one piece of meaning.
 - **Two spellings, one set of data.** 3.2 and 3.3 hold the same data, and a tool that reads one must decide whether to accept the other.
 
 ## 5. Directions Worth Pursuing
 
-3.4 over 3.2 looks like the strongest combination: the model is an annotation pattern in record form, which survives every parser, keeps a duplicate-key check, and has an `@` convention, and the doc comment is the comfortable way to write it. 3.5's layer can be added later without changing the `Doc` pattern, since a glossary only names `Doc` patterns. 3.3 is the form with the most open problems. A top-level `Doc` carries an identity. An ontology file holds many `Graph` patterns, which list their members by identity, and a `Doc` without one could only appear inline among a graph's elements. An anonymous top-level `Doc` is a warning. The same containment gives a general rule: a top-level node, relationship, or annotation that is not referenced from within any `Graph` is orphaned, and an orphan is a warning. This favors 3.2, 3.3, and 3.5, where the `Doc` is a pattern with an identity, and, for 3.4, defers identity entirely: a comment's `Doc` is produced inline in each graph that contains the documented element, so nothing is minted, and a shared element carries its meaning into every graph that holds it. Not settled: the exact desugaring, how a `Doc` written in one graph overrides what a comment says about a shared element, and how a property is addressed (map entry or separate pattern); a revision of any of them could change which framing leads.
+3.4 over 3.2 looks like the strongest combination: the model is an annotation pattern in record form, which survives every parser, keeps a duplicate-key check, and has an `@` convention, and the doc comment is the comfortable way to write it. 3.3 is the form with the most open problems. Around that:
+
+- **Identity follows containment.** An ontology file holds many `Graph` patterns, which list their members by identity. A top-level `Doc` the author writes therefore carries an identity, and an anonymous top-level `Doc` is a warning. A `Doc` produced from a comment carries none: it is produced inline in each graph that contains the documented element, so nothing is minted.
+- **Elements are shared, and `Doc`s accumulate.** An element can belong to several graphs and carries its meaning into each. A graph can hold any number of `Doc`s for one element (languages, audiences, versions), and nothing overrides anything. Choosing which to read is the reader's job, and an author limits the choice by including only the `Doc`s that apply.
+- **The graph is the context.** A graph that holds the French and English `Doc`s of an element already groups them, and a separate audience can have a separate graph over the same elements, so no extra grouping construct is needed.
+- **Orphans.** A top-level node, relationship, or annotation not referenced from within any `Graph` is orphaned, and an orphan is a warning.
+
+Not settled: the exact desugaring, which fields let a reader select `Doc`s, and how a property is addressed (map entry or separate pattern); a revision of any of them could change which framing leads.
 
 ## 6. Disposition
 
 Candidate RFC, not yet written: the shape of a documentation pattern (`Doc`): its fields, the `@` convention, per-property entries, and how a doc comment reads into it. A narrower candidate follows from it, in the gramdoc grammar: `@language`, a quoted localized term after `@property`'s key, and the rule that a comment on a reference documents the referenced element. Items to settle first:
 
 - The exact desugaring from a doc comment to a `Doc` pattern, including what happens when a file holds both.
-- Where a comment's `Doc` is produced: inline in each graph that contains the documented element, and whether an author's `Doc` in one graph overrides it there.
+- Where a comment's `Doc` is produced: inline in each graph that contains the documented element, with nothing minted.
 - The orphan rule: a top-level node, relationship, or annotation not referenced from within a `Graph` is a warning, and an anonymous top-level `Doc` is a warning. These are rules for the ontology profile to check (they join the semantic requirements listed in EXP-002), and they apply to every kind of top-level pattern, not only to documentation.
 - Property addressing: map entries, or one `Doc` per property.
-- Whether the language belongs on each `Doc`, on a glossary, or either.
+- Which fields qualify a `Doc` for selection by a reader: `@language`, and whether others (an audience, say) are conventional.
 
 ## 7. References
 
