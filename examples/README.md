@@ -11,4 +11,6 @@ Verbatim copies of the files from the ontology spike on the `spike/ontology-grap
 
 The `movies.ontology.gram` header also carries a `schema` field that points at the ontology-graph-spec's JSON Schema. That is a mistake and not a convention to follow: once gram has a schema definition, `kind` is what associates a file with it, so a file does not name a schema. The file is left verbatim as provenance.
 
+`movies.ontology.gram` also predates the identity convention EXP-004 settles. Its identity is the spec's node id (`(person::Person {...})`) with the identifying label after `::`, while the ontology profile takes the identifier itself as the identifying label (`(Person {...})`), so it has to be converted before it is a model of the profile.
+
 They are exploratory and may not match the model this project settles on. Both `.ontology.gram` files parse with tree-sitter-gram with no errors, and the integration tests in `crates/gram-ontology/tests/` run `gram-ontology check` against them.

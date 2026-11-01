@@ -17,7 +17,7 @@ A node in a graph can carry several labels, and an ontology has to say which of 
 
 **What gram says.** A node is written `(identifier:Label:Other)`. In plain gram the identifier names the node and each label is a separate matter. The grammar accepts `:` and `::` as the same label separator, so `::` carries no meaning and `(Actor::Person)` is a node identified as `Actor` with one label, `Person`. A label that is not a plain symbol is written in backticks, `` `Director?` ``. gram has no way to mark one label as different from another.
 
-**The ontology convention.** In an ontology file the identifier implies an identifying label of the same name, so the name is not written twice. `Actor` is then both a gram identifier and the identifying label. `(Actor::Person)` reads as `(Actor::Actor:Person)`: identifying label `Actor`, implied label `Person`. The double colon is a stylistic choice for ontology files, in the same way that `=>` is preferred for relationships, because it makes the difference from plain gram visible.
+**The ontology convention.** In an ontology file the identifier implies an identifying label of the same name, so the name is not written twice. `Actor` is then both a gram identifier and the identifying label. `(Actor::Person)` reads as `(Actor::Actor:Person)`: identifying label `Actor`, implied label `Person`. In plain gram `::` means nothing beyond `:`, and the ontology profile does not give it a meaning either: the identifying label comes from the identifier, and the double colon is only a stylistic choice for ontology files, in the same way that `=>` is preferred for relationships, because it makes the difference from plain gram visible.
 
 ```gram
 (Actor::Person)
@@ -39,7 +39,7 @@ with an optional label added:
 
 ### 3.1 Labels written as labels
 
-The labels stay labels, in the notation gram already has. The identifier carries the identifying label, labels after the `::` are implied, and a label that may be absent is marked.
+The labels stay labels, in the notation gram already has. The identifier carries the identifying label, every label after the identifier is implied, whether it follows `::` or `:`, and a label that ends in `?` is optional instead.
 
 ```gram
 (Actor::Person:`Director?`)
@@ -111,6 +111,8 @@ Which of these is needed, and whether `@label` desugars to anything, is not yet 
 Candidate RFC: a section on labels in the ontology profile, or an addition to the profile's foundational RFC, covering the `::` reading, implied and optional labels, the optional marker, and the collision rule. The tree-sitter-gram change for a terminating `?` would be its own, smaller change, to be made when the marker is settled.
 
 Settled:
+
+- **One reading of the identifier:** the ontology profile takes the identifier as the identifying label, as in this exploration. `movies.ontology.gram` was written earlier and reads differently: its identity is the spec's node id, with the identifying label after `::` and implied labels as `:Implied`. Bringing it in line is a required step, changing `(person::Person { ... })` to `(Person { ... })`, with references following; until then it is kept as provenance.
 
 - **Documenting a label:** a label usually has a defining node elsewhere with the full description, but any label may be documented where it is used, to give context there. A `Doc` holds label descriptions under the metadata key `` `@labels` ``, a shallow map keyed by label name, so a label cannot collide with a documented property. The key is the label's name without any `?`, which is only how an optional label is written on the node. A comment's `@label Person text` reads into the entry `Person: md`text``. `person.ontology.gram` shows both forms.
 - **An implied label with no definition:** a warning.
