@@ -44,3 +44,4 @@ Use `/rfc-review` before moving a draft to `review` or `accepted`.
 
 | RFC | Title | Status |
 |---|---|---|
+| [RFC-001](RFC-001-ontology-profile.md) | An Ontology Profile for gram | draft |
