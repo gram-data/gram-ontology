@@ -19,7 +19,7 @@ You **MUST** consider the user input before proceeding. If it's empty, or doesn'
 
 ## Purpose
 
-Evaluate a draft RFC against a consistent set of quality criteria before it moves from `draft` to `review`/`accepted`. Produces specific, actionable suggested revisions — not a checklist of observations. This is the "converge" check on the Discover/Define half of the double-diamond: it doesn't replace `/rfc-create`, it decides whether what it produced is actually ready.
+Evaluate a draft RFC against a consistent set of quality criteria before it moves from `draft` to `review`/`accepted`. Produces specific, actionable suggested revisions — not a checklist of observations. This is the "converge" check on the design the RFC states: it doesn't replace `/rfc-create`, it decides whether what it produced is actually ready.
 
 ## Workflow
 
@@ -33,12 +33,12 @@ Do not edit the RFC yourself — report findings and suggested revisions; let th
 
 ## Review Criteria
 
-### 1. Scope fit — problem, not solution
+### 1. Scope fit — design, not source code
 
-Does the RFC stay at the WHAT/WHY level appropriate to an RFC, per its own `Purpose` guardrail?
+Does the RFC state the problem and the design that answers it, without drifting into building it, per its own `Purpose` guardrail? Notation and data shapes, rules, checks and examples are design and belong in an RFC.
 
-**Flag:** RFC specifies tech stack, APIs, data models, file/module layout, or other implementation detail — that belongs in later design or specification work, not here.
-**Flag:** RFC is so vague that later design work would face constant ambiguity about what problem it's even solving.
+**Flag:** RFC contains programming-language source code, a module, crate or file layout, or a task breakdown for building the design — that belongs to implementation work, not here.
+**Flag:** RFC is so vague that implementation would face constant ambiguity about what problem it's solving or what the design is.
 
 ### 2. Problem is real and motivated
 
@@ -54,12 +54,12 @@ Can a reader tell what's in scope and out of scope without inferring it?
 **Flag:** Goals are vague aspirations ("make it good") rather than checkable boundaries.
 **Flag:** Non-Goals section is missing or empty when the Problem/Proposed Approach clearly implies adjacent work that could be mistaken for in-scope.
 
-### 4. Proposed Approach stays high-level and structured
+### 4. Proposed Approach is structured and reasoned
 
 Per the RFC template, section 5 should be split into numbered `###` subsections whenever more than one genuinely distinct axis or strategy is in play.
 
 **Flag:** Multiple independent axes or strategies are described as one flat paragraph/list instead of numbered subsections — harder to reference from Alternatives/Open Questions or from later design work.
-**Flag:** A subsection contains a decision rather than a candidate direction (i.e. it reads like a design decision, not a candidate direction).
+**Flag:** A subsection states a rule or a shape without saying what it addresses, or leaves a real choice unstated, so the reader cannot tell what was weighed.
 
 ### 5. Alternatives are real, not strawmen
 

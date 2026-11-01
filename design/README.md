@@ -5,7 +5,7 @@ gram-ontology's design is worked out in the open, in documents, before and along
 | Document | Question it answers | Where |
 |---|---|---|
 | **Exploration** (`EXP-NNN`) | What are the several ways to look at this space? Divergent on purpose; owes nothing to any existing document. | [`exploration/`](exploration/README.md) |
-| **RFC** (`RFC-NNN`) | What is the problem, why does it matter, and in what general directions could it be solved? WHAT and WHY, no implementation detail. | [`rfc/`](rfc/README.md) |
+| **RFC** (`RFC-NNN`) | What is the problem, why does it matter, and what design answers it? The design itself (notation, rules, checks), not source code or a build plan. | [`rfc/`](rfc/README.md) |
 
 Later layers (a concrete elaboration of one candidate framing, an architecture decision record, time-boxed spikes) can be added the same way when there is something for them to hold. Each is a directory under `design/` with its own README and index.
 

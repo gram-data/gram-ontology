@@ -1,6 +1,6 @@
 ---
 name: "rfc-create"
-description: "Create or update an RFC: the problem, its motivation, and high-level candidate approaches — the Discover/Define phase that precedes implementation design."
+description: "Create or update an RFC: the problem, its motivation, and candidate approaches and the design they lead to — the project's primary design document."
 argument-hint: "Describe the problem/opportunity, or 'update RFC-003 ...' to revise an existing one"
 compatibility: "Requires design/rfc/ directory (created automatically on first use)"
 metadata:
@@ -19,7 +19,7 @@ You **MUST** consider the user input before proceeding (if not empty). If empty,
 
 ## Purpose
 
-An RFC captures **WHAT** a problem is and **WHY** it matters, plus high-level candidate directions. It does **not** contain implementation detail, technology choices, file/module names, or code structure — that belongs in later design and specification work. Think of the RFC as the Discover→Define half of a double-diamond: it converges on a well-scoped problem statement and a general direction, not a solution.
+An RFC is the project's primary design document. It captures **WHAT** a problem is and **WHY** it matters, and then the design that answers it: the candidate approaches, and where a direction is settled, its specification — the shape of a notation or data model, the rules a tool must check, the behavior a user sees. That detail belongs here. What does not belong is source code in a programming language, module, crate or file layout, and the plan for building it; implementation is planned and carried out afterwards with the speckit skills.
 
 ## Voice and audience
 
@@ -91,13 +91,13 @@ Cross-references are navigation, never load-bearing: every sentence must still p
 
    ## 4. Non-Goals
 
-   ## 5. Proposed Approach (high-level)
+   ## 5. Proposed Approach
 
-   Candidate direction(s) at a conceptual level. No tech stack, APIs, schemas, or file/module layout. If more than one genuinely distinct axis or strategy is being explored, break this section into numbered subsections (`### 5.1 ...`, `### 5.2 ...`) rather than one flat list — e.g. one subsection per independent axis of the problem, one for the candidate strategies themselves, and one for cross-cutting concerns that apply across strategies rather than being an alternative to them.
+   The candidate direction(s), and the design of whatever is settled: notation and data shapes, rules, and checks, with examples. No programming-language source code, and no module or file layout. If more than one genuinely distinct axis or strategy is being explored, break this section into numbered subsections (`### 5.1 ...`, `### 5.2 ...`) rather than one flat list — e.g. one subsection per independent axis of the problem, one for the candidate strategies themselves, and one for cross-cutting concerns that apply across strategies rather than being an alternative to them.
 
    ## 6. Alternatives Considered
 
-   Other strategic directions considered and why they were set aside (this is still at the "what kind of approach" level, not implementation options — that detail belongs in later design work).
+   Other strategic directions considered and why they were set aside (other designs and strategies, not other ways of writing the code).
 
    ## 7. Open Questions
 
@@ -119,7 +119,7 @@ Cross-references are navigation, never load-bearing: every sentence must still p
    - Create: append a new row for this RFC.
    - Update: refresh this RFC's existing row (title/status may have changed) in place — don't duplicate or reorder other rows.
 
-7. **Guardrail — reject implementation detail**: if the user's input describes specific technologies, APIs, data models, or file structures, extract the underlying problem/goal for the RFC and tell the user that detail belongs in later design or specification work, not in the RFC.
+7. **Guardrail — keep source code and build planning out**: if the user's input is programming-language source code, a module or file layout, or a task breakdown for building the design, leave it out and tell the user it belongs to the implementation work done with the speckit skills. Design detail (notation, data shapes, rules, checks, examples) stays in.
 
 ## Completion Report
 

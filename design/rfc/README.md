@@ -1,6 +1,6 @@
 # RFCs — Requests for Comment
 
-RFCs capture **WHAT** a problem is and **WHY** it matters, plus high-level candidate directions: the Discover/Define half of the [design process](../README.md). In this project an RFC is the primary design document, so it may carry the notation-level detail the design consists of, such as the shape of a pattern or a rule a tool must check. Code structure and implementation planning stay out of it and are handled by the speckit skills.
+RFCs capture **WHAT** a problem is and **WHY** it matters, and the design that answers it: the [design process](../README.md)'s primary document. An RFC carries the design itself, such as the shape of a notation or data model, the rules a tool must check, and examples. Programming-language source code, module or file layout, and the plan for building the design stay out of it and are handled by the speckit skills.
 
 ## Audience
 
@@ -11,7 +11,7 @@ The failure mode to avoid is a document addressed to its own authors: one that a
 ## When to write an RFC
 
 - A new capability or subsystem is being considered and the problem or scope is not settled yet.
-- Multiple genuinely different high-level directions exist and the trade-off is worth recording.
+- Multiple genuinely different directions exist and the trade-off is worth recording.
 
 ## Format
 
@@ -32,7 +32,7 @@ Created and updated via `/rfc-create`. File: `design/rfc/RFC-NNN-short-title.md`
 2. Problem / Motivation
 3. Goals
 4. Non-Goals
-5. Proposed Approach (high-level), split into numbered `###` subsections when more than one distinct axis or strategy is explored
+5. Proposed Approach, split into numbered `###` subsections when more than one distinct axis or strategy is explored
 6. Alternatives Considered
 7. Open Questions, each individually numbered (`7.1.`, `7.2.`, ...), never a plain bullet list, so other documents can cite exactly which question they address
 

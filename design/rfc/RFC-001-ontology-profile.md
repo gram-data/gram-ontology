@@ -53,7 +53,7 @@ A doc comment, the natural place to write a description, is discarded by the gen
 - Enforcing an ontology against data in a database.
 - Defining the gram schema language.
 
-## 5. Proposed Approach (high-level)
+## 5. Proposed Approach
 
 ### 5.1 The profile and its identities
 
