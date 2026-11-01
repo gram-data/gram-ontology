@@ -112,7 +112,7 @@ Candidate RFC: a section on labels in the ontology profile, or an addition to th
 
 Settled:
 
-- **Documenting a label:** a label usually has a defining node elsewhere with the full description, but any label may be documented where it is used, to give context there. How a comment's `@label` reads into a `Doc` is not decided; `person.ontology.gram` shows the comment form.
+- **Documenting a label:** a label usually has a defining node elsewhere with the full description, but any label may be documented where it is used, to give context there. A `Doc` holds label descriptions under the metadata key `` `@labels` ``, a shallow map keyed by label name, so a label cannot collide with a documented property. The key is the label's name without any `?`, which is only how an optional label is written on the node. A comment's `@label Person text` reads into the entry `Person: md`text``. `person.ontology.gram` shows both forms.
 - **An implied label with no definition:** a warning.
 - **The optional marker:** the backtick form, `` `Director?` ``, for now. A grammar change for a terminating `?` is considered only if review pushes back.
 - **Reading the backtick form:** every other tool sees the `?` as part of the label, which is acceptable. In an ontology file a label with a trailing `?` is always optional, so a label genuinely named that way is not allowed.

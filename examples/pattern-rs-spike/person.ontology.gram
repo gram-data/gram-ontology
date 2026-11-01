@@ -52,5 +52,14 @@
  */
 (Actor::Person:`Director?`)
 
+// Doc form for labels
+[:Doc {
+    `@description`: md`A person who performs in films.`,
+    `@labels`: {
+        Person: md`Every actor is a person.`,
+        Director: md`An actor may also direct films`
+    }
+} | Actor ]
+
 // Without documentation, an implied label is only a reference to its definition.
 (Producer::Person)
