@@ -64,11 +64,11 @@ The annotations are anonymous and intrinsic, and an array holds as many labels a
 A label is itself a kind of thing, so a hierarchy is a relationship between definitions and not a list on one of them.
 
 ```gram
-(Actor)=[IMPLIES]=>(Person)
-(Person)=[MAY_BE]=>(Director)
+(Actor)=[`@implies`]=>(Person)
+(Person)=[`@optional`]=>(Director)
 ```
 
-The collision between a label and a definition disappears, because both ends are definitions. Documentation attaches to `Person` once and applies wherever it is used. The cost is that a node no longer lists its labels, a tool must walk the graph to find them, the spec's flat `implied` list is spread across relationships, and an ontology of many labels reads as a graph of labels before it reads as a model.
+The collision between a label and a definition disappears, because both ends are definitions. Documentation attaches to `Person` once and applies wherever it is used. The relationship types here are the ontology's own, and a plain name such as `IMPLIES` would take it from the domain, which may well have a relationship of that name, so they need a spelling a domain cannot use, such as the `@`-prefixed backtick-quoted type shown, as `@` already marks the ontology's own keys in a `Doc`. The cost is that a node no longer lists its labels, a tool must walk the graph to find them, the spec's flat `implied` list is spread across relationships, and an ontology of many labels reads as a graph of labels before it reads as a model.
 
 ### 3.4 How an optional label is marked
 
@@ -97,6 +97,7 @@ Which of these is needed, and whether `@label` desugars to anything, is not yet 
 - **A hierarchy as a list or as a graph.** 3.1 and 3.2 follow the spec's flat list. 3.3 follows the structure the labels describe, and stays closer to RDF's subclass relation, but it is no longer a node's own field.
 - **Cost of a grammar change.** A terminating `?` is the cleaner mark and the only one that needs a published grammar to change. The backtick form costs nothing now and is easy to find and replace later.
 - **Reference or definition.** An implied label that matches a definition is a reference. One that matches none is either an undefined label to warn about, or a label that is never defined because nothing needs it.
+- **The ontology's names against the domain's.** 3.3 puts relationship types of the ontology's own among the domain's, so they need a reserved spelling. 3.1 and 3.2 avoid this, since labels and annotations live in positions a domain's names do not occupy.
 - **Descriptive only.** Neither implied nor optional labels are enforced by the database, so a model that says more about them than a graph can check is a statement of intent, and tools must not claim otherwise.
 
 ## 5. Directions Worth Pursuing
