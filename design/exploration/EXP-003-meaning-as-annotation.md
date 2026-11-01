@@ -15,7 +15,7 @@ Relationships raise a second question on the same ground. Some things said about
 
 ## 2. Landscape
 
-**The notation, briefly.** A gram file is a sequence of patterns. In an ontology file an element's identity is its identifying label: a node type is `(Person {name: "STRING!"})` and a relationship type is `(Person)=[ACTED_IN {role: "STRING"}]=>(Movie)`, identified by its type, `ACTED_IN`. A node written with only an identity, `(Person)`, is a reference to the element with that identity defined elsewhere, because identities are unique within a file. Inside a pattern's elements a bare identifier is a reference to any element, node or relationship: `[Movies:Graph | Person, Movie, ACTED_IN]`. At the top level a bare identifier is not a pattern, and a relationship is referenced as `[ACTED_IN]`. A relationship `(a)-[r]->(b)` is the pattern `[r | a, b]`: a relationship is a pattern with two elements, and a pattern can have any number.
+**The notation, briefly.** A gram file is a sequence of patterns. In generic gram a node's identity is simply its identity, and a label is a separate matter. An ontology is a meta graph: it describes kinds of things, so each element needs an identifying label, the one label that names the kind, and an ontology file uses that label as the element's identity. That is a convention of the ontology profile, not of gram. A node type is `(Person {name: "STRING!"})`; a relationship type is `(Person)=[ACTED_IN {role: "STRING"}]=>(Movie)`, identified by its type, `ACTED_IN`. Identities are unique within a file, so a pattern's elements name other patterns by reference, and a reference is always a bare identifier, whether it names a node or a relationship: `[Movies:Graph | Person, Movie, ACTED_IN]`. A reference appears only as an element of a pattern, never as a top-level element. A relationship `(a)-[r]->(b)` is the pattern `[r | a, b]`: a relationship is a pattern with two elements, and a pattern can have any number.
 
 A record value may be a scalar, an array of scalars, or a shallow map whose entries are scalars or arrays of scalars; a map cannot hold a map. A range is a scalar: `1..3`, `1...` (lower bound only), `...3` (upper bound only). Keys may be bare symbols or backtick-quoted names, so `` `@language` `` is a legal key. A record rejects a repeated key as a duplicate.
 
@@ -42,7 +42,7 @@ Meaning is written in `/** ... */` next to the element, in the comment's tags.
 (Person {name: "STRING!"})
 ```
 
-A second language is a second comment on a reference to the same element:
+A reference cannot be a top-level element, so a second language has to sit before a pattern that names the element. A `Doc` with no fields of its own can carry the comment, and take its content from it:
 
 ```text
 /**
@@ -51,10 +51,10 @@ A second language is a second comment on a reference to the same element:
  * @language "fr"
  * @property name "nom" Le nom complet de la personne.
  */
-(Person)
+[:Doc | Person]
 ```
 
-Writing it is natural, and it reads as documentation. The costs: the content is free text with tags inside a comment, so a generic pattern parser never sees it; each language repeats the comment; and `@language` and a quoted localized name are not tags gramdoc knows today (it keeps them as unknown tags, or as description text).
+Writing it is natural, and it reads as documentation. The costs: the content is free text with tags inside a comment, so a generic pattern parser never sees it; each language repeats the comment, and needs a `Doc` to carry it; and `@language` and a quoted localized name are not tags gramdoc knows today (it keeps them as unknown tags, or as description text).
 
 ### 3.2 An annotation pattern, written as a record
 
@@ -119,11 +119,10 @@ Within the wrapping form, cardinality can be keyed by end, `{ source: 0..., targ
 - **One namespace for two kinds of key.** In a `Doc` record, the `Doc`'s own fields and the names of the documented element's properties share the key space. The `@` prefix separates them in a record (3.2) and cannot be used in annotation syntax (3.3). Without a convention, a property named `description` or `language` cannot be documented.
 - **How much structure fits per property.** A per-property map can hold scalars and arrays of scalars, so a description, a localized term, a reference, and a list of aliases fit. Anything deeper needs another pattern.
 - **Where the language lives.** On each comment or `Doc`, as a qualifying field, so a reader can pick the `Doc`s in the language they want. Beyond `@language` the convention is deliberately left open: a doc comment keeps tags it does not know, and a `Doc` record can carry further `@`-prefixed fields, so an author who needs to tell `Doc`s apart by audience, version, or anything else can evolve their own convention.
-- **Referencing a relationship at the top level.** A bare identifier is not a top-level pattern, so a doc comment that documents a reference to a relationship sits before `[ACTED_IN]`, which differs in form from the node reference `(Person)`.
+- **Where a second-language comment sits.** A reference is never a top-level element, so a comment cannot document a reference directly. The candidate is a field-less `Doc`, `[:Doc | Person]`, that takes its content from the comment. Whether that is the right carrier, or the comment should be written as a full `Doc`, is open.
 - **Intrinsic versus extra.** A `Doc` references its target and is extra; cardinality wraps the definition and is intrinsic. The cost of wrapping is that a relationship's outermost pattern may be an annotation, and tools look through it to the relationship, whose identity is unchanged.
 - **Positional counts are less self-describing.** `[0..., 1...]` makes the reader pair each range with an element. The array must be as long as the pattern has elements, which is a check, and the order matters for a relationship whose ends are interchangeable.
 - **Self-loops are not cardinality.** The positional ranges count participation; they cannot say that two elements are the same node. A self-loop requirement needs its own attribute.
-- **Does the annotation carry a label?** An anonymous `[{ cardinality: ... } | ...]` is enough today. Once other kinds of annotation exist, a reader has to tell them apart: by key name, or by a label such as `[:Cardinality ...]`, which also keeps extensions from colliding on key names.
 - **Where the rules are checked.** The content of a comment is checked by a comment grammar, and the content of a record by whatever describes records of this kind. 3.4 puts both in play for one piece of meaning.
 - **Two spellings, one set of data.** 3.2 and 3.3 hold the same data, and a tool that reads one must decide whether to accept the other.
 
@@ -131,24 +130,26 @@ Within the wrapping form, cardinality can be keyed by end, `{ source: 0..., targ
 
 3.4 over 3.2 looks like the strongest combination for meaning: the model is an annotation pattern in record form, which survives every parser, keeps a duplicate-key check, and has an `@` convention, and the doc comment is the comfortable way to write it. 3.3 is the form with the most open problems. For structure, the wrapping annotation with positional cardinality (3.5). Around that:
 
-- **Identity follows containment.** An ontology file holds many `Graph` patterns, which list their members by identity. A top-level `Doc` the author writes therefore carries an identity, and an anonymous top-level `Doc` is a warning. A `Doc` produced from a comment carries none: it is produced inline in each graph that contains the documented element, so nothing is minted. Elements and relationships are identified by label and type, and referenced by bare identifier inside patterns.
+- **Identity follows containment.** An ontology file holds many `Graph` patterns, which list their members by identity. A top-level `Doc` the author writes therefore carries an identity, and an anonymous top-level `Doc` is a warning. A `Doc` produced from a comment carries none: it is produced inline in each graph that contains the documented element, so nothing is minted. In an ontology, elements are identified by their identifying label (nodes) and type (relationships), a convention of the ontology profile and not of gram, and a reference is a bare identifier among a pattern's elements.
 - **Elements are shared, and `Doc`s accumulate.** An element can belong to several graphs and carries its meaning into each. A graph can hold any number of `Doc`s for one element (languages, audiences, versions), and nothing overrides anything. Choosing which to read is the reader's job, and an author limits the choice by including only the `Doc`s that apply. A comment and an authored `Doc` for the same element simply both exist.
 - **The graph is the context.** A graph that holds the French and English `Doc`s of an element already groups them, and a separate audience can have a separate graph over the same elements, so no extra grouping construct is needed.
 - **Orphans.** A top-level node, relationship, or annotation not referenced from within any `Graph` is orphaned, and an orphan is a warning.
-- **Desugaring a doc comment.** The target is the next sibling in its container: a reference `(x)` or `[x]` means element `x`, and a definition means its own identity. A comment on an element with no identity is a warning. The comment produces one `[:Doc {...} | target]` in each graph that contains the target. The free text becomes `` `@description` ``; `@language "x"` becomes `` `@language` `` for the whole comment; `@alias` and `@reference` become `` `@aliases` `` (an array) and `` `@reference` ``; `@property key "term" text` becomes an entry `key: { term, description }`; an unknown tag becomes an `@`-prefixed field of the same name.
+- **Desugaring a doc comment.** The target is the next sibling in its container. A comment on a definition produces one `[:Doc {...} | X]`, where `X` is the definition's identity, in each graph that contains it; a comment on an element with no identity is a warning. A comment on a `Doc` that has no fields, `[:Doc | X]`, fills that `Doc`. The free text becomes `` `@description` ``; `@language "x"` becomes `` `@language` `` for the whole comment; `@alias` and `@reference` become `` `@aliases` `` (an array) and `` `@reference` ``; `@property key "term" text` becomes an entry `key: { term, description }`; an unknown tag becomes an `@`-prefixed field of the same name.
 - **Properties are addressed by map entry.** One `Doc` holds an entry per property, keyed by its name, with its description, localized term, aliases, and reference. A property that needs more than scalars and arrays is promoted to its own pattern, as gram's own depth budget says to do.
 - **Documentation says nothing about the ends of a relationship.** A description of a source or target adds little. What matters about an end is its cardinality, which is structure.
 - **Cardinality is a wrapping annotation with positional ranges.** `@cardinality([0..., 1...])` before the definition, written with gram's range literals. For element *i* the range is how many patterns of this kind each such element takes part in. The array's length must equal the pattern's number of elements. A self-loop requirement stays a separate attribute.
-- **Under that split, gramdoc's `@source`, `@target`, and `@self` tags are redundant.** Comments carry meaning, and structure is written on the definition. Dropping them is a small breaking change to a published grammar and is leaned toward, not decided.
+- **Two tiers of annotation.** A `Doc` is lightweight, semi-formal extra information, labeled, accumulating, and optional to read. An `@` annotation is extra definition: anonymous, intrinsic, written once, and changing what the thing is. This echoes object-oriented languages, which mark a declaration with an annotation, attribute, or decorator to say more about what it is, and keep prose documentation separate. Comments carry the first tier and the definition carries the second.
+- **Intrinsic annotations are anonymous.** In entity-component-system terms, a named annotation identifies a specific system, and an anonymous one is an intrinsic, extensional attribute. The aim is to accumulate more intrinsic attributes in that space before specializing. A kind of annotation gets a label when it becomes a system of its own, and table definitions are the likely first.
+- **A self-loop is `@self(true)`.** `@cardinality([0..., 0...]) @self(true) (Person)=[KNOWS]=>(Person)` parses today. An implicit-true form would need gram to change, and the options differ: an empty `@self()` is a syntax error now but would be unambiguous; a bare `@self` cannot work, because `@self (n)` is read as `@self(n)` with the value `n`. What an empty value means in general (true, null, empty) is a question for gram as a whole, so it is deferred.
+- **gramdoc drops `@source`, `@target`, and `@self`.** They are redundant under this split, and the removal is decided. It is a small breaking change to a published grammar.
 
 Underspecified on purpose: beyond `@language`, how `Doc`s are told apart is left to authors, since unknown tags and fields are kept.
 
 ## 6. Disposition
 
-Candidate RFCs, not yet written: the shape of a documentation pattern (`Doc`): its fields, the `@` convention, per-property entries, and how a doc comment reads into it; and the shape of the structural annotation on a relationship definition, starting with cardinality. A narrower candidate follows in the gramdoc grammar: `@language`, a quoted localized term after `@property`'s key, the rule that a comment on a reference documents the referenced element, and the removal of `@source`, `@target`, and `@self`. Items to settle first:
+Candidate RFCs, not yet written: the shape of a documentation pattern (`Doc`): its fields, the `@` convention, per-property entries, and how a doc comment reads into it; and the shape of the structural annotation on a relationship definition, starting with cardinality. A narrower candidate follows in the gramdoc grammar: `@language`, a quoted localized term after `@property`'s key, the rule that a comment on a reference documents the referenced element, and the removal of `@source`, `@target`, and `@self`, which is decided. Items to settle first:
 
-- Whether the annotation pattern carries a label, and if so which, so that kinds of annotation can be told apart.
-- How a self-loop requirement is written.
+- The carrier for a second-language comment: a field-less `[:Doc | X]`, or something else.
 - The orphan rule and the anonymous top-level `Doc` warning: rules for the ontology profile to check (they join the semantic requirements listed in EXP-002), applying to every kind of top-level pattern.
 - The length check on positional cardinality.
 
@@ -157,5 +158,6 @@ Out of scope here, and the next ground to cover: multiple graphs and the bridges
 ## 7. References
 
 - The Neo4j ontology-graph-spec: `description`, `aliases`, and `reference` on nodes, relationships, and properties, relationship end counts, and a property `name` distinct from its id.
+- Annotations, attributes, and decorators in object-oriented languages (Java annotations, C# attributes, Python and TypeScript decorators): prior art for stating extra definition on a declaration with a marker written before it.
 - SKOS and RDFS labels: `rdfs:label`, `rdfs:comment`, `skos:prefLabel`, and `skos:altLabel`, with language tags on the literal. Prior art for a localized term and its alternatives, attached from outside the thing named.
 - OWL annotation properties: statements about an entity that carry no logical meaning, attached to the entity from outside it.
