@@ -37,3 +37,30 @@
  * @property name "nom": Le nom complet de la personne. (@aliases: "anon", "anonyme")
  */
 (Person)
+
+// Labels
+//
+// In an ontology the identifier implies the identifying label, so `Actor` below is both.
+// Every label after the identifier is implied, whether it follows `::` or `:`, unless it ends
+// in `?`, which makes it optional. Here every Actor is a Person, which is defined above.
+// The `?` is written inside backticks for now.
+// The identifying label cannot be optional.
+/**
+ * A person who performs in films.
+ *
+ * @label Person Every actor is a person.
+ * @label Director An actor may also direct films.
+ */
+(Actor::Person:`Director?`)
+
+// Or this: the same documentation of Actor as a Doc, an alternative to the comment above, not an addition.
+[:Doc {
+    `@description`: md`A person who performs in films.`,
+    `@labels`: {
+        Person: md`Every actor is a person.`,
+        Director: md`An actor may also direct films`
+    }
+} | Actor ]
+
+// Without documentation, an implied label is only a reference to its definition.
+(Producer::Person)

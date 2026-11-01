@@ -1,151 +1,93 @@
 // movies.ontology.gram
 //
-// SPIKE. Gram translation of movies.yaml, the example in neo4j/ontology-graph-spec
-// (schema 1.0.0). Source copy: ./movies.yaml. Builds on ../graphtype/ conventions.
-//
-// STANCE
-// ======
-// Qualification is external. A node does not know its context, so nothing is
-// nested inside an element to describe it. Meaning (description, aliases,
-// reference) is a separate `Meaning` pattern attached with `@on(...)`, and a
-// `Glossary` context groups the meanings that apply together. The same element
-// can have other Meaning patterns in other Glossary contexts (another audience
-// or language) without being edited.
+// Gram translation of movies.yaml, the example in neo4j/ontology-graph-spec
+// (schema 1.0.0). Source copy: ./movies.yaml. Originally a spike; brought in line with the
+// conventions in design/exploration/EXP-003 and EXP-004.
 //
 // MAPPING (spec -> gram)
 // ======================
-//   schema (URL)            header record `schema`
-//   id                      identity of the Ontology subject pattern
-//   name, version           record on the Ontology pattern
-//   description, aliases,   a Meaning pattern, `@on(<element>)`, and for a
-//   reference               property also `@property(<key>)`. Grouped by Glossary.
-//   nodes.<id>              (<id>::<Label> { ... }). The spec id is the pattern
-//                           identity; labels.identifier (or the `label`
-//                           shorthand) is the `::` label. Implied labels would
-//                           follow as `:Implied`.
+//   id, name, version       a Graph pattern: [movies:Graph { name, version } | members]
+//   nodes.<id>              (<Label> { ... }). In an ontology the identifier is the
+//                           identifying label, so `person` + `label: Person` is just
+//                           `(Person ...)`. Implied labels follow as `::Implied`,
+//                           optional ones as `:`Optional?``.
+//   relationships.<id>      (<From>)=[<TYPE> { ... }]=>(<To>). The identifier of a
+//                           relationship is its type; the ends are references to nodes.
 //   properties.<key>        record entry `key:: cypher`TYPE``.
 //                           must_exist: true  -> `TYPE!`
 //                           unique / key      -> @unique(key) / @key(key)
-//   relationships.<id>      (<from>)=[<id>::<TYPE> { ... }]=>(<to>), where
-//                           from.node and to.node are node identities.
+//   description, aliases,   a gramdoc comment on the definition, which reads into a Doc
+//   reference               pattern inside the Graph: description is the text, aliases
+//                           are @alias tags, a property is documented with @property.
 //
 // NOT COVERED by this file (not in movies.yaml): longhand named constraints,
 // indexes, display, custom, data sources and mappings, relationship counts,
-// one_of, pattern, dimension, optional labels, property `name`.
-//
-// DIFFERENCES FROM ../graphtype/ (deliberate, to review)
-//   1. Identity is the spec id (`person`), not the label (`Person`), so
-//      references and round-tripping survive two nodes sharing a label.
-//   2. Fat arrow is written `=[...]=>`, which is what the tree-sitter-gram
-//      grammar defines. The graphtype files write `==[...]=>`.
+// one_of, pattern, dimension, implied and optional labels, property `name`.
 //
 // OPEN QUESTIONS
-//   - `@property(name)` addresses a property of an element, following the
-//     `@on(Animal) @property(id)` precedent in graphtype.schema.gram. Properties
-//     have no identity of their own, so nothing checks the key exists.
-//   - `STRING!` folds the spec's EXISTS constraint into the type string, as the
-//     graphtype files do. The spec keeps type and constraint separate.
-//   - Glossary is this spike's name for a meaning context. The spec has no
-//     such concept.
+//   - `STRING!` folds the spec's EXISTS constraint into the type string. The spec
+//     keeps type and constraint separate.
 
 {
-  kind: "ontology",
-  schema: url`https://neo4j.com/docs/ontology-graph-spec/1.0.0/schema.json`
+  kind: "ontology"
 }
 
 
 // -----------------------------------------------------------------------------
-// NODE ELEMENT TYPES
+// NODE DEFINITIONS
 // -----------------------------------------------------------------------------
 
-(person::Person {
+/**
+ * A person who acts in movies.
+ *
+ * @alias Actor
+ * @alias Performer
+ * @property name The person's full name.
+ */
+(Person {
   name:: cypher`STRING!`
 })
 
+/**
+ * A film released to the public.
+ *
+ * @alias Film
+ * @property title The title the movie was released under.
+ */
 @unique(title)
-(movie::Movie {
+(Movie {
   title:: cypher`STRING`
 })
 
 
 // -----------------------------------------------------------------------------
-// RELATIONSHIP ELEMENT TYPES
+// RELATIONSHIP DEFINITIONS
 // -----------------------------------------------------------------------------
 
-(person)=[acted-in::ACTED_IN {
+/**
+ * The person appeared in the movie as a cast member.
+ *
+ * @property role The character the person played.
+ */
+(Person)=[ACTED_IN {
   role:: cypher`STRING`
-}]=>(movie)
+}]=>(Movie)
 
 
 // -----------------------------------------------------------------------------
-// THE ONTOLOGY
+// THE GRAPH
 //
-// Names its members by identity, as the GraphType pattern does.
+// Lists its members by identity. Documentation from the comments above is read
+// into Doc patterns inside this graph.
 // -----------------------------------------------------------------------------
 
-[movies::Ontology {
+/**
+ * People and the movies they act in.
+ */
+[movies:Graph {
   name:    "Movies",
   version: "1.0.0"
 } |
-  person, movie,
-  acted-in
-]
-
-
-// -----------------------------------------------------------------------------
-// MEANING
-//
-// description, aliases and reference live outside the elements they describe.
-// -----------------------------------------------------------------------------
-
-@on(movies)
-[movies-meaning::Meaning {
-  description: "People and the movies they act in."
-}]
-
-@on(person)
-[person-meaning::Meaning {
-  description: "A person who acts in movies.",
-  aliases:     ["Actor", "Performer"]
-}]
-
-@on(person) @property(name)
-[person-name-meaning::Meaning {
-  description: "The person's full name."
-}]
-
-@on(movie)
-[movie-meaning::Meaning {
-  description: "A film released to the public.",
-  aliases:     ["Film"]
-}]
-
-@on(movie) @property(title)
-[movie-title-meaning::Meaning {
-  description: "The title the movie was released under."
-}]
-
-@on(acted-in)
-[acted-in-meaning::Meaning {
-  description: "The person appeared in the movie as a cast member."
-}]
-
-@on(acted-in) @property(role)
-[acted-in-role-meaning::Meaning {
-  description: "The character the person played."
-}]
-
-
-// -----------------------------------------------------------------------------
-// CONTEXT
-//
-// The meanings that apply together for this ontology.
-// -----------------------------------------------------------------------------
-
-@on(movies)
-[movies-glossary::Glossary |
-  movies-meaning,
-  person-meaning, person-name-meaning,
-  movie-meaning, movie-title-meaning,
-  acted-in-meaning, acted-in-role-meaning
+  Person, Movie,
+  ACTED_IN
 ]
