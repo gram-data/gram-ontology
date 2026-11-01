@@ -119,7 +119,7 @@ Within the wrapping form, cardinality can be keyed by end, `{ source: 0..., targ
 - **One namespace for two kinds of key.** In a `Doc` record, the `Doc`'s own fields and the names of the documented element's properties share the key space. The `@` prefix separates them in a record (3.2) and cannot be used in annotation syntax (3.3). Without a convention, a property named `description` or `language` cannot be documented.
 - **How much structure fits per property.** A per-property map can hold scalars and arrays of scalars, so a description, a localized term, a reference, and a list of aliases fit. Anything deeper needs another pattern.
 - **Where the language lives.** On each comment or `Doc`, as a qualifying field, so a reader can pick the `Doc`s in the language they want. Beyond `@language` the convention is deliberately left open: a doc comment keeps tags it does not know, and a `Doc` record can carry further `@`-prefixed fields, so an author who needs to tell `Doc`s apart by audience, version, or anything else can evolve their own convention.
-- **Where a second-language comment sits.** A reference is never a top-level element, so a comment cannot document a reference directly. The candidate is a field-less `Doc`, `[:Doc | Person]`, that takes its content from the comment. Whether that is the right carrier, or the comment should be written as a full `Doc`, is open.
+- **Where a second-language comment sits.** A reference is never a top-level element, so a comment cannot document a reference directly. The candidate is a field-less `Doc`, `[:Doc | Person]`, that takes its content from the comment. Decided: a field-less `[:Doc | X]` is the carrier, and the comment fills it.
 - **Intrinsic versus extra.** A `Doc` references its target and is extra; cardinality wraps the definition and is intrinsic. The cost of wrapping is that a relationship's outermost pattern may be an annotation, and tools look through it to the relationship, whose identity is unchanged.
 - **Positional counts are less self-describing.** `[0..., 1...]` makes the reader pair each range with an element. The array must be as long as the pattern has elements, which is a check, and the order matters for a relationship whose ends are interchangeable.
 - **Self-loops are not cardinality.** The positional ranges count participation; they cannot say that two elements are the same node. A self-loop requirement needs its own attribute.
@@ -147,12 +147,14 @@ Underspecified on purpose: beyond `@language`, how `Doc`s are told apart is left
 
 ## 6. Disposition
 
-Candidate RFCs, not yet written: the shape of a documentation pattern (`Doc`): its fields, the `@` convention, per-property entries, and how a doc comment reads into it; and the shape of the structural annotation on a relationship definition, starting with cardinality. A narrower candidate follows in the gramdoc grammar: `@language`, a quoted localized term after `@property`'s key, the rule that a comment on a reference documents the referenced element, and the removal of `@source`, `@target`, and `@self`, which is decided. Items to settle first:
+Candidate RFCs, not yet written: the shape of a documentation pattern (`Doc`): its fields, the `@` convention, per-property entries, and how a doc comment reads into it; and the shape of the structural annotation on a relationship definition, starting with cardinality. The gramdoc side is done in tree-sitter-gramdoc 0.3.0: `@language`, a quoted localized term and trailing `(@key value)` attributes on `@property`, and `@source`, `@target` and `@self` no longer special. The points that were open are settled as follows.
 
-- The carrier for a second-language comment: a field-less `[:Doc | X]`, or something else.
-- Whether gram gets a line-style doc comment, `///`, as Rust, C#, Swift, and Dart have. Not needed for a first RFC: the block form is enough, and a `///` form could be added later.
-- The orphan rule and the anonymous top-level `Doc` warning: rules for the ontology profile to check (they join the semantic requirements listed in EXP-002), applying to every kind of top-level pattern.
-- The length check on positional cardinality.
+- **Second-language carrier:** a field-less `[:Doc | X]`, which a doc comment fills.
+- **Self-loop:** written `@self(true)` for now. If gram later allows an empty value that means true, the shorthand can follow without changing the model.
+- **Positional cardinality length:** the array must have exactly one range per element of the pattern; a different length is an error.
+- **Orphans and anonymous top-level `Doc`s:** warnings for the ontology profile, joining the semantic requirements in EXP-002 and applying to every kind of top-level pattern.
+- **Duplicate keys:** the grammar parses a repeated key and `gram lint` reports it, but `gram-ontology check` does not run that check yet, so the RFC must require it of the tooling.
+- **`///` line doc comment:** not needed for a first RFC, since the block form is enough; it could be added later.
 
 Out of scope here, and the next ground to cover: multiple graphs and the bridges between them, and how other domain-specific annotations attach, such as indexes and table definitions. Cardinality is the first non-documentary annotation, and the wrapping shape is what those would reuse.
 
