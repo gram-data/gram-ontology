@@ -17,11 +17,11 @@ Relationships raise a second question on the same ground. Some things said about
 
 **The notation, briefly.** A gram file is a sequence of patterns. In generic gram a node's identity is simply its identity, and a label is a separate matter. An ontology is a meta graph: it describes kinds of things, so each element needs an identifying label, the one label that names the kind, and an ontology file uses that label as the element's identity. That is a convention of the ontology profile, not of gram. A node type is `(Person {name: "STRING!"})`; a relationship type is `(Person)=[ACTED_IN {role: "STRING"}]=>(Movie)`, identified by its type, `ACTED_IN`. Identities are unique within a file, so a pattern's elements name other patterns by reference, and a reference is always a bare identifier, whether it names a node or a relationship: `[Movies:Graph | Person, Movie, ACTED_IN]`. A reference appears only as an element of a pattern, never as a top-level element. A relationship `(a)-[r]->(b)` is the pattern `[r | a, b]`: a relationship is a pattern with two elements, and a pattern can have any number.
 
-A record value may be a scalar, an array of scalars, or a shallow map whose entries are scalars or arrays of scalars; a map cannot hold a map. A range is a scalar: `1..3`, `1...` (lower bound only), `...3` (upper bound only). Keys may be bare symbols or backtick-quoted names, so `` `@language` `` is a legal key. A record rejects a repeated key as a duplicate.
+A record value may be a scalar, an array of scalars, or a shallow map whose entries are scalars or arrays of scalars; a map cannot hold a map. A range is a scalar: `1..3`, `1...` (lower bound only), `...3` (upper bound only). A string can carry a tag that names its type or format, ``iso`fr` `` for a language code or ``md`text` `` for markdown. Keys may be bare symbols or backtick-quoted names, so `` `@language` `` is a legal key. A record rejects a repeated key as a duplicate.
 
 **Annotations.** `@key(value)` before a pattern annotates it, and the value can be a scalar, an array, or a map. An annotation is a pattern whose single element is the annotated pattern, with the keys as its record: `@cardinality([0..., 1...]) P` and `[{ cardinality: [0..., 1...] } | P]` hold the same data. `@@id:Label` before the `@key(value)` entries gives the annotation an identity and labels. Annotation keys must be plain symbols; a backtick-quoted key is a syntax error there, and a repeated annotation key is accepted silently, which the record spelling does not do.
 
-**Comments.** gram has a documentation comment, `/** ... */`, parsed by a separate grammar (gramdoc) that knows tags: `@property name text`, `@alias`, `@reference`, `@elements`, `@source`, `@target`, `@self`, and it keeps tags it does not know. A doc comment documents the next element in the same container. The generic pattern parsers discard comments, so anything written only in a comment is absent from the pattern they build.
+**Comments.** gram has a documentation comment, `/** ... */`, parsed by a separate grammar (gramdoc) that knows tags: `@property name text`, `@alias`, `@reference`, `@elements`, `@source`, `@target`, `@self`, and it keeps tags it does not know. A doc comment documents the next element in the same container. gram's only multi-line comment is this doc block: `//` is a plain line comment, and a plain `/* */` block is a syntax error. Javadoc, TSDoc, and Kotlin's KDoc likewise read documentation only from `/** */`; Rust, C#, Swift, and Dart add a line form, `///`, which gram does not have. The generic pattern parsers discard comments, so anything written only in a comment is absent from the pattern they build.
 
 **What meaning needs.** From the Neo4j ontology-graph-spec and from two spike files in this repository (`examples/pattern-rs-spike/`): a `description`, `aliases`, and a `reference`, on a node, a relationship, and a property. Properties have no identity of their own, so documenting one means naming it by key. The spec also has a property `name`, the property's name in the database when it differs from its id, which is a different thing from a localized word. One spike file (`movies.ontology.gram`) keeps meaning out of the elements, as separate `Meaning` patterns attached with `@on(...)` and grouped in a `Glossary`; the other (`person.ontology.gram`) documents a node in a comment and adds a second pattern for the French name. The spike also gathers its patterns into a containing pattern that names its members by identity, so a pattern that is to belong to a containing graph needs an identity to be named by. An ontology file holds many such graphs, each an explicit pattern, because the alternative for a multi-graph ontology is references from one file to another. An element can belong to several graphs. These are definitions and descriptions, so sharing is natural, in the way a node can be contained by many relationships; it is what lets graphs overlap along a shared interface, as EXP-001 describes.
 
@@ -62,12 +62,12 @@ Meaning is data: a labeled pattern whose element is the thing documented, refere
 
 ```gram
 [Person_fr:Doc {
-  `@language`: "fr",
-  `@description`: "Un être humain.",
+  `@language`: iso`fr`,
+  `@description`: md`Un être humain.`,
   `@aliases`: ["Personne"],
   name: {
     term: "nom",
-    description: "Le nom complet de la personne.",
+    description: md`Le nom complet de la personne.`,
     aliases: ["anon"]
   }
 } | Person]
@@ -81,10 +81,10 @@ The same data, with the annotation syntax.
 
 ```gram
 @@Person_fr :Doc
-@language("fr")
-@description("Un être humain.")
+@language(iso`fr`)
+@description(md`Un être humain.`)
 @aliases(["Personne"])
-@name({ term: "nom", description: "Le nom complet de la personne.", aliases: ["anon"] })
+@name({ term: "nom", description: md`Le nom complet de la personne.`, aliases: ["anon"] })
 (Person)
 ```
 
@@ -134,7 +134,7 @@ Within the wrapping form, cardinality can be keyed by end, `{ source: 0..., targ
 - **Elements are shared, and `Doc`s accumulate.** An element can belong to several graphs and carries its meaning into each. A graph can hold any number of `Doc`s for one element (languages, audiences, versions), and nothing overrides anything. Choosing which to read is the reader's job, and an author limits the choice by including only the `Doc`s that apply. A comment and an authored `Doc` for the same element simply both exist.
 - **The graph is the context.** A graph that holds the French and English `Doc`s of an element already groups them, and a separate audience can have a separate graph over the same elements, so no extra grouping construct is needed.
 - **Orphans.** A top-level node, relationship, or annotation not referenced from within any `Graph` is orphaned, and an orphan is a warning.
-- **Desugaring a doc comment.** The target is the next sibling in its container. A comment on a definition produces one `[:Doc {...} | X]`, where `X` is the definition's identity, in each graph that contains it; a comment on an element with no identity is a warning. A comment on a `Doc` that has no fields, `[:Doc | X]`, fills that `Doc`. The free text becomes `` `@description` ``; `@language "x"` becomes `` `@language` `` for the whole comment; `@alias` and `@reference` become `` `@aliases` `` (an array) and `` `@reference` ``; `@property key "term" text` becomes an entry `key: { term, description }`; an unknown tag becomes an `@`-prefixed field of the same name.
+- **Desugaring a doc comment.** The target is the next sibling in its container. A comment on a definition produces one `[:Doc {...} | X]`, where `X` is the definition's identity, in each graph that contains it; a comment on an element with no identity is a warning. A comment on a `Doc` that has no fields, `[:Doc | X]`, fills that `Doc`. The free text becomes `` `@description` `` as a markdown string, md`...`; `@language "x"` becomes `` `@language` `` for the whole comment, as an ISO-tagged string, iso`x`; `@alias` and `@reference` become `` `@aliases` `` (an array) and `` `@reference` ``; `@property key "term" text` becomes an entry `key: { term, description }`, with the description a markdown string and the term a plain string; an unknown tag becomes an `@`-prefixed field of the same name.
 - **Properties are addressed by map entry.** One `Doc` holds an entry per property, keyed by its name, with its description, localized term, aliases, and reference. A property that needs more than scalars and arrays is promoted to its own pattern, as gram's own depth budget says to do.
 - **Documentation says nothing about the ends of a relationship.** A description of a source or target adds little. What matters about an end is its cardinality, which is structure.
 - **Cardinality is a wrapping annotation with positional ranges.** `@cardinality([0..., 1...])` before the definition, written with gram's range literals. For element *i* the range is how many patterns of this kind each such element takes part in. The array's length must equal the pattern's number of elements. A self-loop requirement stays a separate attribute.
@@ -150,6 +150,7 @@ Underspecified on purpose: beyond `@language`, how `Doc`s are told apart is left
 Candidate RFCs, not yet written: the shape of a documentation pattern (`Doc`): its fields, the `@` convention, per-property entries, and how a doc comment reads into it; and the shape of the structural annotation on a relationship definition, starting with cardinality. A narrower candidate follows in the gramdoc grammar: `@language`, a quoted localized term after `@property`'s key, the rule that a comment on a reference documents the referenced element, and the removal of `@source`, `@target`, and `@self`, which is decided. Items to settle first:
 
 - The carrier for a second-language comment: a field-less `[:Doc | X]`, or something else.
+- Whether gram gets a line-style doc comment, `///`, as Rust, C#, Swift, and Dart have. Not needed for a first RFC: the block form is enough, and a `///` form could be added later.
 - The orphan rule and the anonymous top-level `Doc` warning: rules for the ontology profile to check (they join the semantic requirements listed in EXP-002), applying to every kind of top-level pattern.
 - The length check on positional cardinality.
 
