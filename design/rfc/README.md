@@ -1,6 +1,6 @@
 # RFCs — Requests for Comment
 
-RFCs capture **WHAT** a problem is and **WHY** it matters, plus high-level candidate directions: the Discover/Define half of the [design process](../README.md). They deliberately exclude implementation detail.
+RFCs capture **WHAT** a problem is and **WHY** it matters, plus high-level candidate directions: the Discover/Define half of the [design process](../README.md). In this project an RFC is the primary design document, so it may carry the notation-level detail the design consists of, such as the shape of a pattern or a rule a tool must check. Code structure and implementation planning stay out of it and are handled by the speckit skills.
 
 ## Audience
 

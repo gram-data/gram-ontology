@@ -9,7 +9,7 @@ gram-ontology's design is worked out in the open, in documents, before and along
 
 Later layers (a concrete elaboration of one candidate framing, an architecture decision record, time-boxed spikes) can be added the same way when there is something for them to hold. Each is a directory under `design/` with its own README and index.
 
-The two current Explorations are [EXP-001, structural ontologies for a multi-graph space](exploration/EXP-001-structural-ontologies.md), and [EXP-002, ontology tooling over the gram syntax tree](exploration/EXP-002-ontology-tooling-over-the-cst.md).
+The current Explorations are [EXP-001, structural ontologies for a multi-graph space](exploration/EXP-001-structural-ontologies.md), [EXP-002, ontology tooling over the gram syntax tree](exploration/EXP-002-ontology-tooling-over-the-cst.md), [EXP-003, meaning and structure as annotation](exploration/EXP-003-meaning-as-annotation.md), and [EXP-004, labels in an ontology](exploration/EXP-004-labels.md).
 
 ## Tooling
 
