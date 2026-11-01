@@ -1,7 +1,7 @@
 ---
 id: EXP-003
 title: Meaning and Structure as Annotation
-status: exploring
+status: concluded
 created: 2026-10-31
 ---
 
