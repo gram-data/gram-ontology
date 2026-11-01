@@ -5,11 +5,11 @@ gram-ontology's design is worked out in the open, in documents, before and along
 | Document | Question it answers | Where |
 |---|---|---|
 | **Exploration** (`EXP-NNN`) | What are the several ways to look at this space? Divergent on purpose; owes nothing to any existing document. | [`exploration/`](exploration/README.md) |
-| **RFC** (`RFC-NNN`) | What is the problem, why does it matter, and in what general directions could it be solved? WHAT and WHY, no implementation detail. | [`rfc/`](rfc/README.md) |
+| **RFC** (`RFC-NNN`) | What is the problem, why does it matter, and what design answers it? The design itself (notation, rules, checks), not source code or a build plan. | [`rfc/`](rfc/README.md) |
 
 Later layers (a concrete elaboration of one candidate framing, an architecture decision record, time-boxed spikes) can be added the same way when there is something for them to hold. Each is a directory under `design/` with its own README and index.
 
-The two current Explorations are [EXP-001, structural ontologies for a multi-graph space](exploration/EXP-001-structural-ontologies.md), and [EXP-002, ontology tooling over the gram syntax tree](exploration/EXP-002-ontology-tooling-over-the-cst.md).
+The current Explorations are [EXP-001, structural ontologies for a multi-graph space](exploration/EXP-001-structural-ontologies.md), [EXP-002, ontology tooling over the gram syntax tree](exploration/EXP-002-ontology-tooling-over-the-cst.md), [EXP-003, meaning and structure as annotation](exploration/EXP-003-meaning-as-annotation.md), and [EXP-004, labels in an ontology](exploration/EXP-004-labels.md).
 
 ## Tooling
 
