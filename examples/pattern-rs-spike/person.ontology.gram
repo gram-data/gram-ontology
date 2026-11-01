@@ -8,6 +8,7 @@
     name: "STRING!"
 })
 
+// Don't do this...
 /**
  * Un être humain.
  *
@@ -16,3 +17,21 @@
 [:French {
       name: "nom"
 } | Person ]
+
+// Do this instead
+[:Doc {
+    `@language`: iso`fr`,
+    `@description`: md`Un être humain.`,
+        name: {
+            term: "nom",
+            description: "'nom' Le nom complet de la personne."
+        }
+} | Person ]
+
+// Or this...
+/**
+ * Un être humain.
+ *
+ * @property name Le nom complet de la personne.
+ */
+(Person)
