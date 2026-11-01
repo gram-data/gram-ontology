@@ -1,7 +1,7 @@
 ---
 id: EXP-004
 title: Labels in an Ontology
-status: exploring
+status: concluded
 created: 2026-11-01
 ---
 
