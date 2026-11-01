@@ -57,13 +57,13 @@ A doc comment, the natural place to write a description, is discarded by the gen
 
 ### 5.1 The profile and its identities
 
-A file opts in by both its name and its `kind: ontology` record, and a mismatch between them is a warning. An ontology is a graph about kinds of things, so in the profile an element's identity is the name it is known by: a node's identifier is its identifying label, and a relationship's identifier is its type. `(Person)` is the identifier and the label at once, and the label is not written twice. In plain gram an identity is only an identity, and this convention belongs to the profile.
+A file opts in by both its name and its `kind: ontology` record, and a mismatch between them is a warning. An ontology is a graph about kinds of things, so in the profile an element's identity is the name it is known by: a node's identifier is its identifying label, and a relationship's identifier is its type. `(Person)` is the identifier and the label at once, and the label is not written twice. An identifier is unique within a file, so a node and a relationship cannot share a name, and a relationship type has one definition. A type used between different pairs of nodes, such as `OWNS` from both `Person` and `Company` to `Car`, is therefore not yet expressible by default (see 7.6). In plain gram an identity is only an identity, and this convention belongs to the profile.
 
 A reference to an element is its bare identifier, written among another pattern's elements, and a reference is never a top-level element. A file holds any number of `Graph` patterns, each a pattern whose elements list the graph's members by identity. An element may belong to several graphs, since a definition is shared by nature. A top-level node, relationship or annotation that no graph refers to is orphaned, which is a warning, as is a top-level `Doc` with no identity.
 
 ### 5.2 Meaning as an accumulating `Doc`
 
-Meaning is carried by a `Doc` pattern that references the element it describes. Its own fields use `@`-prefixed keys, written in backticks (`@description`, `@language`, `@aliases`, `@reference`, `@labels`), so they cannot collide with the names of the properties it documents. Each documented property is an entry keyed by its name, holding a localized term, a description, and any further attributes. Descriptions are markdown, and a language is an ISO-tagged string.
+Meaning is carried by a `Doc` pattern that references the element it describes. Its own fields use `@`-prefixed keys, written in backticks (`@description`, `@language`, `@aliases`, `@reference`, `@labels`), so they cannot collide with the names of the properties it documents. A property name that begins with `@` is not allowed in an ontology file, which reserves the prefix for metadata. Each documented property is an entry keyed by its name, holding a localized term, a description, and any further attributes. Descriptions are markdown, and a language is an ISO-tagged string.
 
 Several `Doc`s may describe one element, one per language, audience or version, and nothing overrides anything: a reader chooses which to read, and the graph an element appears in is the context. Authors who need to tell `Doc`s apart beyond language add their own `@`-prefixed fields.
 
@@ -81,7 +81,7 @@ Authoring is by doc comment, a `/** ... */` block whose tags are parsed by gramd
 
 ### 5.3 Structure as a wrapping annotation
 
-What a relationship is, as opposed to what it means, is intrinsic and is written as an anonymous annotation that wraps the definition. Cardinality is one range per element of the pattern, in the pattern's order, using gram's range notation, so it works for a relationship of any arity. A self-loop is a separate attribute, since counts say how many and not whether two elements are the same node. The array length must equal the number of pattern elements.
+What a relationship is, as opposed to what it means, is intrinsic and is written as an anonymous annotation that wraps the definition. Cardinality is one range per element of the pattern, in the pattern's order, using gram's range notation, so it works for a relationship of any arity. A self-loop is a separate attribute, since counts say how many and not whether two elements are the same node. The array length must equal the number of pattern elements. Each range counts how many relationships of that kind a node at that element takes part in, so in the example below each `Person` acts in any number of movies and each `Movie` has at least one actor. This is the reverse of the UML reading, and exporters must not swap it.
 
 ```gram
 @cardinality([0..., 1...])
@@ -113,7 +113,8 @@ A tool conforming to the profile reports, beyond syntax:
 - a documented property that does not exist on the element, and a doc comment that has no target;
 - a cardinality whose length differs from the number of pattern elements, and a self-loop declared where the relationship's ends are not the same node;
 - an implied label with no definition, a cycle among implied labels, and a trailing `?` on an identifying label;
-- two `Doc`s in the same language for one element.
+- a property name beginning with `@`, and two definitions with the same identifier;
+- two `Doc`s that cannot be told apart: for one element in one graph, the same `@language` and the same values for every other `@`-prefixed field except the description, labels and property entries. Copies of one comment's `Doc` in different graphs, and `Doc`s that differ by audience or version, are not duplicates.
 
 ## 6. Alternatives Considered
 
@@ -137,4 +138,6 @@ A tool conforming to the profile reports, beyond syntax:
 
 7.4. Whether a required property stays folded into its type (`STRING!`) or becomes a separate constraint, as the spec keeps them.
 
-7.5. Whether two `Doc`s in the same language for one element are a warning or an error, and whether the checks in 5.6 are configurable in severity.
+7.5. Whether `Doc`s that cannot be told apart are a warning or an error, and whether the checks in 5.6 are configurable in severity.
+
+7.6. How to define a relationship type used between several pairs of nodes, and a node and relationship that share a name. Candidates: an explicit identifier distinct from the label or type for the definitions that need one, as plain gram already allows, or a qualified identifier.
