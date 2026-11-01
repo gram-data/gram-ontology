@@ -110,7 +110,13 @@ Which of these is needed, and whether `@label` desugars to anything, is not yet 
 
 Candidate RFC: a section on labels in the ontology profile, or an addition to the profile's foundational RFC, covering the `::` reading, implied and optional labels, the optional marker, and the collision rule. The tree-sitter-gram change for a terminating `?` would be its own, smaller change, to be made when the marker is settled.
 
-Still open: how a label is documented (3.5, to be settled by experiment with `@label`), what a tool does with an implied label that has no definition, and whether the optional marker belongs in gram generally or only in ontology files.
+Settled:
+
+- **Documenting a label:** a label usually has a defining node elsewhere with the full description, but any label may be documented where it is used, to give context there. How a comment's `@label` reads into a `Doc` is not decided; `person.ontology.gram` shows the comment form.
+- **An implied label with no definition:** a warning.
+- **The optional marker:** the backtick form, `` `Director?` ``, for now. A grammar change for a terminating `?` is considered only if review pushes back.
+- **Reading the backtick form:** every other tool sees the `?` as part of the label, which is acceptable. In an ontology file a label with a trailing `?` is always optional, so a label genuinely named that way is not allowed.
+- **The `label` shorthand:** not needed, since the identifier already names the identifying label.
 
 ## 7. References
 
