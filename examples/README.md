@@ -2,15 +2,13 @@
 
 ## `pattern-rs-spike/`
 
-Verbatim copies of the files from the ontology spike on the `spike/ontology-graph-spec-gram` branch of [relateby/pattern-rs](https://github.com/relateby/pattern-rs) (`data/schema/ontology/`), kept as seed fixtures:
+Copies of the files from the ontology spike on the `spike/ontology-graph-spec-gram` branch of [relateby/pattern-rs](https://github.com/relateby/pattern-rs) (`data/schema/ontology/`), kept as seed fixtures:
 
 - `person.ontology.gram`: a node documented with gramdoc, plus a French context variant.
-- `movies.ontology.gram`: a translation of the ontology-graph-spec's `movies.yaml` example, with `kind: "ontology"` in the top-level record. It documents meaning with separate `Meaning` patterns attached by `@on(...)`, which predates the gramdoc approach.
+- `movies.ontology.gram`: a translation of the ontology-graph-spec's `movies.yaml` example, with `kind: "ontology"` in the top-level record.
 - `movies.yaml`: the spec's example, for comparison.
 - `README.md`: the spike's own notes.
 
-The `movies.ontology.gram` header also carries a `schema` field that points at the ontology-graph-spec's JSON Schema. That is a mistake and not a convention to follow: once gram has a schema definition, `kind` is what associates a file with it, so a file does not name a schema. The file is left verbatim as provenance.
-
-`movies.ontology.gram` also predates the identity convention EXP-004 settles. Its identity is the spec's node id (`(person::Person {...})`) with the identifying label after `::`, while the ontology profile takes the identifier itself as the identifying label (`(Person {...})`), so it has to be converted before it is a model of the profile.
+`person.ontology.gram` is the spike's file with label and `Doc` examples added. `movies.ontology.gram` was rewritten to follow EXP-003 and EXP-004: the identifier is the identifying label, relationships are identified by their type, documentation is gramdoc comments, the members are listed by a `Graph` pattern, and there is no `schema` field (`kind` is what will associate the file with a gram schema).
 
 They are exploratory and may not match the model this project settles on. Both `.ontology.gram` files parse with tree-sitter-gram with no errors, and the integration tests in `crates/gram-ontology/tests/` run `gram-ontology check` against them.

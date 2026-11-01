@@ -112,7 +112,7 @@ Candidate RFC: a section on labels in the ontology profile, or an addition to th
 
 Settled:
 
-- **One reading of the identifier:** the ontology profile takes the identifier as the identifying label, as in this exploration. `movies.ontology.gram` was written earlier and reads differently: its identity is the spec's node id, with the identifying label after `::` and implied labels as `:Implied`. Bringing it in line is a required step, changing `(person::Person { ... })` to `(Person { ... })`, with references following; until then it is kept as provenance.
+- **One reading of the identifier:** the ontology profile takes the identifier as the identifying label, as in this exploration. `movies.ontology.gram` was written earlier and reads differently: its identity is the spec's node id, with the identifying label after `::` and implied labels as `:Implied`. It has since been brought in line, with `(person::Person { ... })` becoming `(Person { ... })` and the references following.
 
 - **Documenting a label:** a label usually has a defining node elsewhere with the full description, but any label may be documented where it is used, to give context there. A `Doc` holds label descriptions under the metadata key `` `@labels` ``, a shallow map keyed by label name, so a label cannot collide with a documented property. The key is the label's name without any `?`, which is only how an optional label is written on the node. A comment's `@label Person text` reads into the entry `Person: md`text``. `person.ontology.gram` shows both forms.
 - **An implied label with no definition:** a warning.
