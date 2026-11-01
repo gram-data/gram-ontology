@@ -24,7 +24,8 @@
     `@description`: md`Un être humain.`,
         name: {
             term: "nom",
-            description: "'nom' Le nom complet de la personne."
+            description: md`Le nom complet de la personne.`,
+            aliases: ["anon", "anonyme"]
         }
 } | Person ]
 
@@ -32,6 +33,7 @@
 /**
  * Un être humain.
  *
- * @property name Le nom complet de la personne.
+ * @language "fr"
+ * @property name "nom": Le nom complet de la personne. (@aliases: "anon", "anonyme")
  */
 (Person)
