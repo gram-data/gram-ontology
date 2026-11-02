@@ -1,0 +1,7 @@
+{ kind: "ontology" }
+
+(Person)
+(Movie)
+(Person)=[ACTED_IN]=>(Movie)
+[a:Graph | Person, Movie]
+[b:Graph | Person, ACTED_IN]

@@ -1,0 +1,4 @@
+{ kind: "ontology" }
+
+(A::A)
+[g:Graph | A]

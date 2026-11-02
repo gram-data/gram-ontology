@@ -24,11 +24,29 @@ fn spike_movies_file_is_clean() {
 
 #[test]
 fn file_named_ontology_without_kind_warns_but_succeeds() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("plain.ontology.gram");
+    fs::write(&path, "(a)\n[g:Graph | a]\n").unwrap();
     cmd()
-        .args(["check", &spike("person.ontology.gram")])
+        .arg("check")
+        .arg(&path)
         .assert()
         .success()
         .stdout(predicate::str::contains("opt-in-mismatch"));
+}
+
+/// `person.ontology.gram` sets alternative spellings side by side ("Don't do this...", "Do this
+/// instead"), so it deliberately breaks the profile. It is a discussion file, not a conforming
+/// ontology, and the check rightly reports it. Spec Story 6 scenario 5: the file stays as it is.
+#[test]
+fn person_spike_is_a_discussion_file_and_is_reported() {
+    cmd()
+        .args(["check", &spike("person.ontology.gram")])
+        .assert()
+        .failure()
+        .stdout(predicate::str::contains("opt-in-mismatch"))
+        .stdout(predicate::str::contains("duplicate-identifier"))
+        .stdout(predicate::str::contains("property-value-in-definition"));
 }
 
 #[test]
@@ -55,19 +73,17 @@ fn syntax_error_fails() {
         .assert()
         .failure()
         .code(1)
-        .stdout(predicate::str::contains("parse-error"));
+        .stdout(
+            predicate::str::contains("missing-node").or(predicate::str::contains("syntax-error")),
+        );
 }
 
 #[test]
 fn invalid_gramdoc_fails() {
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("doc.ontology.gram");
-    // `@self` is a bare marker: text after it is a gramdoc parse error.
-    fs::write(
-        &path,
-        "{kind: \"ontology\"}\n/** @self nope */\n[:SAME_AS | (p), (p)]\n",
-    )
-    .unwrap();
+    // `@language` needs a code: a bare `@language` is a gramdoc parse error.
+    fs::write(&path, "{kind: \"ontology\"}\n/** @language */\n(p)\n").unwrap();
     cmd()
         .arg("check")
         .arg(&path)
@@ -78,8 +94,11 @@ fn invalid_gramdoc_fails() {
 
 #[test]
 fn json_output_uses_the_gram_diagnostics_schema() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("plain.ontology.gram");
+    fs::write(&path, "(a)\n[g:Graph | a]\n").unwrap();
     let out = cmd()
-        .args(["check", "--json", &spike("person.ontology.gram")])
+        .args(["check", "--json", &path.display().to_string()])
         .assert()
         .success()
         .get_output()

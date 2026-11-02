@@ -1,0 +1,36 @@
+{ kind: "ontology" }
+
+// duplicate-key (lint)
+(Keyed { k:: "A", k:: "B" })
+// duplicate-identifier
+(Twin)
+(Twin)
+// orphaned-pattern
+(Orphan)
+// undefined-implied-label, ambiguous-implied-label
+(Under::Nowhere)
+(p1:Dup)
+(p2:Dup)
+(Amb::Dup)
+// cycles and optional identifying label
+(C1::C2)
+(C2::C1)
+(`Opt?`)
+// misplaced separator and relationship `::`
+(mis:Mis::Extra)
+(Extra)
+(Person { `@bad`:: "S", ok: "value", name:: "S" })
+(Movie)
+(Person)=[acts::ACTED_IN]=>(Movie)
+@cardinality([0...])
+(Person)=[LIKES]=>(Movie)
+@self(true)
+(Person)=[WORKS_FOR]=>(Movie)
+(Hanging)
+[:Doc { `@language`: iso`fr` } | Person]
+[g:Graph | Keyed, Twin, Under, p1, p2, Amb, C1, C2, `Opt?`, mis, Extra, Person, Movie, acts, LIKES, WORKS_FOR, Hanging,
+  [:Doc { nmae: { term: "x" } } | Person],
+  [:Doc { `@language`: iso`de` } | Person],
+  [:Doc { `@language`: iso`de` } | Person]
+]
+/** dangling comment */

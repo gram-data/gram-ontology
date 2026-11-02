@@ -1,0 +1,5 @@
+{ kind: "ontology" }
+
+(Person)
+[g:Graph | Person]
+/** dangling */

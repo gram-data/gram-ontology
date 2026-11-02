@@ -1,0 +1,10 @@
+{ kind: "ontology" }
+
+/**
+ * A person.
+ *
+ * @property name The full name.
+ */
+(Person { name:: "STRING" })
+[a:Graph | Person, [:Doc { `@language`: iso`fr`, name: { term: "nom" } } | Person]]
+[b:Graph | Person]

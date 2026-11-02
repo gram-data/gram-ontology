@@ -1,0 +1,5 @@
+{ kind: "ontology" }
+
+(Person)
+(Movie)
+[g:Graph | Person]

@@ -1,0 +1,7 @@
+{ kind: "ontology" }
+
+(Person)
+(Movie)
+@cardinality([0...])
+(Person)=[ACTED_IN]=>(Movie)
+[g:Graph | Person, Movie, ACTED_IN]

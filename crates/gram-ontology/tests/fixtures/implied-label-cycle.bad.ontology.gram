@@ -1,0 +1,6 @@
+{ kind: "ontology" }
+
+(A::B)
+(B::C)
+(C::A)
+[g:Graph | A, B, C]

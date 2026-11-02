@@ -1,0 +1,7 @@
+{ kind: "ontology" }
+
+(Person)
+@cardinality([0..., 0...])
+@self(true)
+(Person)=[KNOWS]=>(Person)
+[g:Graph | Person, KNOWS]

@@ -6,6 +6,7 @@
 - **Rationale**: the lint implementation is public in `gram-data` and returns `gram_diagnostics::Diagnostic`, the type this command already emits, so the two cannot disagree (spec A4, FR-028). `gram-diagnostics` 0.4.1 and 0.6.0 have identical sources but are different crates to the compiler, so the dependency must move to 0.6 for the types to unify. gram-data 0.6.0's rules (read from source; re-check against 0.6.1 when the dependency is added, per FR-029): `syntax-error`, `missing-node`, `duplicate-element`, `duplicate-key`.
 - **Cost**: `gram-data` is one crate with the `gram` CLI, so it also brings `reqwest`, `zip`, `tar`, `flate2`, `toml`, `ariadne` and others used by extension install. This only costs build time and binary size.
 - **Alternatives**: (a) reimplement `duplicate-key` and `duplicate-element` here: duplicates code, can drift from lint (violates FR-029); (b) shell out to `gram lint`: contradicts standalone (A4); (c) ask for a slimmer `gram-lint` crate upstream: better long-term, out of scope now. If the dependency's weight proves unacceptable during implementation, fall back to (c) and record it.
+- **Measured (T002, T003)**: gram-data 0.6.1 has the same four lint rules as 0.6.0. A cold build with the dependency takes about 16 s, and the debug binary stays about 3.5 MB because only the lint function is linked in.
 - **Open risk**: lint parses the source itself, so the file is parsed twice. Acceptable for SC-005; measure.
 
 ## R2. De-duplicating lint and profile findings
@@ -42,8 +43,15 @@ Named kinds relevant here: `node_pattern`, `subject_pattern` (`[...|...]`, with 
 
 ## R8. Self-loop spelling
 
-- **Open**: RFC §7.2 (`@self`) is unresolved, and gramdoc 0.3.0 no longer treats `@self` or `cardinality` as doc-comment tags, so structure is only ever read from wrapping annotations (RFC §5.3). The plan targets whatever form the RFC examples and `tests` use; if none exists, the first task is to confirm the spelling against `examples/` and EXP-003. The detection is isolated in `checks/structure.rs` so a change touches one place.
+- **Resolved**: the self-loop is `@self(true)` (EXP-003); a bare `@self` is a syntax error. RFC §7.2 (`@self`) is unresolved, and gramdoc 0.3.0 no longer treats `@self` or `cardinality` as doc-comment tags, so structure is only ever read from wrapping annotations (RFC §5.3). The plan targets whatever form the RFC examples and `tests` use; if none exists, the first task is to confirm the spelling against `examples/` and EXP-003. The detection is isolated in `checks/structure.rs` so a change touches one place.
 
 ## R9. Test strategy
 
 - One fixture per scenario in `tests/fixtures/`, named `<check-name>.<good|bad>.ontology.gram`; a CLI test asserts check name, severity, line and exit status. The two spike examples must stay clean (FR-026, SC-003). A superset test runs `lint_source` on every fixture and asserts each lint diagnostic appears in the command's output (SC-007).
+
+## R10. Findings from implementation
+
+- **`child_by_field_name("elements")`** on a subject pattern returns the anonymous `|` token, because the field also covers it. The model takes the first *named* node in the field.
+- **A doc comment before the first element of a graph** is a child of the subject pattern, not of its elements node. The model merges those comments with the elements, in source order.
+- **`person.ontology.gram`** sets alternative spellings side by side ("Don't do this..."), so it deliberately breaks the profile: it has duplicate definitions, a `key: value` in a definition and anonymous Docs. It is a discussion file and is left unchanged; `tests/check.rs` records that it is reported.
+- **A comment Doc and a written Doc** for one element in one graph with no `@language` are indistinguishable under RFC §5.6, so `duplicate-doc` reports them. Authors write `@language` on one of them.

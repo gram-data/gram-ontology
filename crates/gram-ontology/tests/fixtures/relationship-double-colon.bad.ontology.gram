@@ -1,0 +1,6 @@
+{ kind: "ontology" }
+
+(Person)
+(Car)
+(Person)=[ownsCar::OWNS]=>(Car)
+[g:Graph | Person, Car, ownsCar]

@@ -14,10 +14,11 @@ path = "src/main.rs"
 [dependencies]
 clap = { version = "4.5", features = ["derive"] }
 serde_json = "1"
-gram-diagnostics = "0.4"
+gram-diagnostics = "0.6.1"
+gram-data = "0.6.1"
 tree-sitter = "0.26"
-tree-sitter-gram = "0.6"
-tree-sitter-gramdoc = "0.2"
+tree-sitter-gram = "0.6.1"
+tree-sitter-gramdoc = "0.3"
 
 [dev-dependencies]
 assert_cmd = "2"

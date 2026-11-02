@@ -1,8 +1,12 @@
 //! `gram ontology`: strict checks over `*.ontology.gram` files.
 //!
 //! The base tree is the tree-sitter-gram CST. This extension adds requirements on top of
-//! valid gram and never produces a different tree. This is a skeleton: it checks that a file
-//! parses, looks at the opt-in markers, and parses each doc comment with gramdoc.
+//! valid gram and never produces a different tree. One run reports everything `gram lint`
+//! reports plus the profile checks of RFC-001 §5.6.
+
+mod checks;
+mod lint;
+mod model;
 
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -10,6 +14,8 @@ use std::process::ExitCode;
 use clap::{Parser, Subcommand};
 use gram_diagnostics::{Diagnostic, FileResult, LintResult, Position, Range, Severity};
 use tree_sitter::{Node, Parser as TsParser, Tree};
+
+use model::{range_of, text};
 
 #[derive(Parser)]
 #[command(
@@ -47,7 +53,6 @@ fn check(files: &[PathBuf], json: bool) -> ExitCode {
         let diagnostics = match std::fs::read_to_string(path) {
             Ok(source) => check_source(path, &source),
             Err(e) => vec![diagnostic(
-                Severity::Error,
                 "io-error",
                 format!("cannot read file: {e}"),
                 Range {
@@ -108,47 +113,21 @@ fn check(files: &[PathBuf], json: bool) -> ExitCode {
 
 /// All checks for one file's source text.
 fn check_source(path: &Path, source: &str) -> Vec<Diagnostic> {
-    let mut diagnostics = Vec::new();
-
     let mut parser = TsParser::new();
     parser
         .set_language(&tree_sitter_gram::LANGUAGE.into())
         .expect("load gram grammar");
+    let lint = lint::lint(source);
     let Some(tree) = parser.parse(source, None) else {
-        diagnostics.push(diagnostic(
-            Severity::Error,
-            "parse-error",
-            "could not parse file".into(),
-            whole_file(),
-        ));
-        return diagnostics;
+        return lint;
     };
 
-    collect_parse_errors(tree.root_node(), &mut diagnostics);
-    check_opt_in(path, source, &tree, &mut diagnostics);
-    check_doc_comments(tree.root_node(), source, &mut diagnostics);
-    diagnostics
-}
-
-fn collect_parse_errors(node: Node, out: &mut Vec<Diagnostic>) {
-    if node.is_error() || node.is_missing() {
-        let message = if node.is_missing() {
-            format!("missing {}", node.kind())
-        } else {
-            "syntax error".into()
-        };
-        out.push(diagnostic(
-            Severity::Error,
-            "parse-error",
-            message,
-            range_of(node),
-        ));
-        return;
-    }
-    let mut cursor = node.walk();
-    for child in node.children(&mut cursor) {
-        collect_parse_errors(child, out);
-    }
+    let mut profile = Vec::new();
+    check_opt_in(path, source, &tree, &mut profile);
+    check_doc_comments(tree.root_node(), source, &mut profile);
+    let model = model::build(&tree, source);
+    profile.extend(checks::run(&model));
+    lint::merge(lint, profile)
 }
 
 /// A file opts in with both the `*.ontology.gram` name and `kind: ontology` in the top-level
@@ -171,12 +150,7 @@ fn check_opt_in(path: &Path, source: &str, tree: &Tree, out: &mut Vec<Diagnostic
             "top-level record has `kind: ontology` but the file is not named *.ontology.gram"
         }
     };
-    out.push(diagnostic(
-        Severity::Warning,
-        "opt-in-mismatch",
-        message.into(),
-        whole_file(),
-    ));
+    out.push(diagnostic("opt-in-mismatch", message.into(), whole_file()));
 }
 
 fn has_kind_ontology(root: Node, source: &str) -> bool {
@@ -210,7 +184,6 @@ fn check_doc_comments(node: Node, source: &str, out: &mut Vec<Diagnostic>) {
         if let Some(tree) = parser.parse(comment, None) {
             if tree.root_node().has_error() {
                 out.push(diagnostic(
-                    Severity::Error,
                     "gramdoc-parse-error",
                     "doc comment is not valid gramdoc".into(),
                     range_of(node),
@@ -222,24 +195,6 @@ fn check_doc_comments(node: Node, source: &str, out: &mut Vec<Diagnostic>) {
     let mut cursor = node.walk();
     for child in node.children(&mut cursor) {
         check_doc_comments(child, source, out);
-    }
-}
-
-fn text<'a>(node: Node, source: &'a str) -> &'a str {
-    &source[node.byte_range()]
-}
-
-fn range_of(node: Node) -> Range {
-    let (s, e) = (node.start_position(), node.end_position());
-    Range {
-        start: Position {
-            line: s.row as u32,
-            character: s.column as u32,
-        },
-        end: Position {
-            line: e.row as u32,
-            character: e.column as u32,
-        },
     }
 }
 
@@ -256,13 +211,6 @@ fn whole_file() -> Range {
     }
 }
 
-fn diagnostic(severity: Severity, rule: &str, message: String, range: Range) -> Diagnostic {
-    Diagnostic {
-        severity,
-        rule: rule.into(),
-        message,
-        range,
-        code: None,
-        help: None,
-    }
+fn diagnostic(rule: &str, message: String, range: Range) -> Diagnostic {
+    checks::diagnostic(rule, message, range, None)
 }

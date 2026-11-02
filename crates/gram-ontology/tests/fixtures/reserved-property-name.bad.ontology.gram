@@ -1,0 +1,4 @@
+{ kind: "ontology" }
+
+(Person { `@id`:: "STRING" })
+[g:Graph | Person]

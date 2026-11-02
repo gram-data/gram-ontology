@@ -1,0 +1,11 @@
+{ kind: "ontology" }
+
+(Person)
+/** Shared comment. */
+(Movie)
+[a:Graph | Person, Movie,
+  [:Doc { `@language`: iso`fr` } | Person],
+  [:Doc { `@language`: iso`de` } | Person],
+  [:Doc { `@language`: iso`fr`, `@audience`: "kids" } | Person]
+]
+[b:Graph | Movie]
