@@ -157,6 +157,7 @@ Candidate RFCs, not yet written: the shape of a documentation pattern (`Doc`): i
 - **`///` line doc comment:** not needed for a first RFC, since the block form is enough; it could be added later.
 
 Out of scope here, and the next ground to cover: multiple graphs and the bridges between them, and how other domain-specific annotations attach, such as indexes and table definitions. Cardinality is the first non-documentary annotation, and the wrapping shape is what those would reuse.
+- **Superseded by RFC-001:** this exploration writes property declarations with a single colon, `(Person {name: "STRING!"})`. RFC-001 5.5 requires the double colon, `name:: "STRING!"`, and treats a single-colon entry in a definition's record as a warning. Where they differ, the RFC governs.
 
 ## 7. References
 
