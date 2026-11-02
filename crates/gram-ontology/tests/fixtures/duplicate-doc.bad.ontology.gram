@@ -1,0 +1,7 @@
+{ kind: "ontology" }
+
+(Person)
+[g:Graph | Person,
+  [:Doc { `@language`: iso`fr`, `@description`: md`a` } | Person],
+  [:Doc { `@language`: iso`fr`, `@description`: md`b` } | Person]
+]

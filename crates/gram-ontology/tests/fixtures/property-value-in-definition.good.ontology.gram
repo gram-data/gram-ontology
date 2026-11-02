@@ -1,0 +1,7 @@
+{ kind: "ontology" }
+
+(Person { name:: "STRING" })
+[g:Graph { name: "People", version: "1.0.0" } |
+  Person,
+  [:Doc { `@language`: iso`fr`, name: { term: "nom" } } | Person]
+]

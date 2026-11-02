@@ -1,0 +1,7 @@
+{ kind: "ontology" }
+
+(Person)
+(Company)
+@self(true)
+(Person)=[WORKS_FOR]=>(Company)
+[g:Graph | Person, Company, WORKS_FOR]

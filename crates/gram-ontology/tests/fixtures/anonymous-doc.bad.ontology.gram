@@ -1,0 +1,5 @@
+{ kind: "ontology" }
+
+(Person)
+[:Doc { `@language`: iso`fr` } | Person]
+[g:Graph | Person]

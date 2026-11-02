@@ -1,0 +1,6 @@
+{ kind: "ontology" }
+
+(Person)
+(Movie)
+(Person)=[ACTED_IN { role: "S" }]=>(Movie)
+[g:Graph | Person, Movie, ACTED_IN]

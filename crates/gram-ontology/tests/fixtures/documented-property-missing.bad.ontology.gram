@@ -1,0 +1,4 @@
+{ kind: "ontology" }
+
+(Person { name:: "STRING" })
+[g:Graph | Person, [:Doc { nmae: { term: "nom" } } | Person]]

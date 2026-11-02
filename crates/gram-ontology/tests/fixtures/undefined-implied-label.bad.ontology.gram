@@ -1,0 +1,4 @@
+{ kind: "ontology" }
+
+(Actor::Person)
+[g:Graph | Actor]

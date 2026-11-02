@@ -1,0 +1,6 @@
+{ kind: "ontology" }
+
+/** A film. */
+@unique(title)
+(Movie { title:: "STRING" })
+[g:Graph | Movie]

@@ -1,0 +1,12 @@
+{ kind: "ontology" }
+
+(Person { name:: "STRING" })
+[g:Graph |
+  /**
+   * Un être humain.
+   *
+   * @language "fr"
+   * @property nmae "nom": Le nom complet.
+   */
+  Person
+]

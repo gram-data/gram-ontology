@@ -1,0 +1,6 @@
+{ kind: "ontology" }
+
+(Person { name:: cypher`STRING` })
+(Actor::Person)
+(actor::Actor:Person)
+[g:Graph | Person, Actor, actor]

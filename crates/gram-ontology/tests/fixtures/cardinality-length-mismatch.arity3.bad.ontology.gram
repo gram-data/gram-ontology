@@ -1,0 +1,8 @@
+{ kind: "ontology" }
+
+(Person)
+(Movie)
+(Role)
+@cardinality([0..., 1...])
+[:PLAYS | (Person), (Movie), (Role)]
+[g:Graph | Person, Movie, Role, PLAYS]
