@@ -11,6 +11,13 @@ fn property_value_in_definition() {
     );
     // Single-colon entries are fine in a Graph's and a Doc's records.
     assert_clean("property-value-in-definition.good");
+    // The same mistake in a relationship's record.
+    assert_only(
+        "property-value-in-definition.relationship.bad",
+        "property-value-in-definition",
+        "warning",
+        "role: \"S\"",
+    );
 }
 
 #[test]

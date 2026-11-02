@@ -39,8 +39,8 @@ description: "Task list for gram-ontology check covering every RFC-001 section 5
 - [X] T006 Create `crates/gram-ontology/src/model.rs` with the entities in `data-model.md`: `Definition`, `Graph`, `Doc`, `Annotation` and the derived indexes `by_identifier`, `by_identifying_label`, `label_edges`, `referenced`; building from the tree-sitter CST, looking through `annotated_pattern`, reading `:` vs `::` from the anonymous separator token and expanding the `(Actor::Person)` shorthand (research R3, R4); skip regions with syntax errors (FR-027, research R6)
 - [X] T007 Unit-test the model builder in `crates/gram-ontology/src/model.rs` on inline sources: `(Person)`, `(Actor::Person)`, `(actor:Actor:Person)`, `(actor::Actor:Person)`, `[ownsCar:OWNS]`, annotation-wrapped definitions, top-level `(a)` and `()-[r]->()` treated as definitions (spec A6)
 - [X] T008 Create `crates/gram-ontology/src/checks/mod.rs` with the check registry (name, severity, function over the model) and one severity table holding the spec's severity table (research R7, FR-021, spec A1); expose a `diagnostic_for(check_name, message, range, help)` builder so no check picks its own severity
-- [X] T009 Move the existing opt-in-mismatch and doc-comment parse checks from `crates/gram-ontology/src/main.rs` into the registry unchanged in name and severity (`opt-in-mismatch`, `gramdoc-parse-error`; spec A7), keeping `tests/check.rs` passing
-- [X] T010 Extend the doc-comment parse in `crates/gram-ontology/src/checks/docs.rs` (new file) to read each comment's tags into the `Doc` model with positions mapped to the host file: `@language`, `@property` (term, description, `(@key value)` attributes), `@alias`, `@reference`, `@label`, unknown tags as `@`-prefixed fields; parse terms and attribute values (strip quotes, split lists) here, per research R5
+- [X] T009 Route the existing opt-in-mismatch and doc-comment parse checks through the severity table in `crates/gram-ontology/src/checks/mod.rs`; the checks themselves stay in `crates/gram-ontology/src/main.rs`, with unchanged names and severities (spec A7), keeping `tests/check.rs` passing
+- [X] T010 Extend the doc-comment parse in `crates/gram-ontology/src/model.rs` to read each comment's tags into the `Doc` model with positions mapped to the host file: `@language`, `@property` (term, description, `(@key value)` attributes), `@alias`, `@reference`, `@label`, unknown tags as `@`-prefixed fields; parse terms and attribute values (strip quotes, split lists) here, per research R5
 
 **Checkpoint**: `cargo test` passes; the model builds for both spike examples.
 
@@ -58,7 +58,7 @@ description: "Task list for gram-ontology check covering every RFC-001 section 5
 - [X] T012 [P] [US6] Fixtures and CLI test in `crates/gram-ontology/tests/output.rs`: a file with several mistakes prints lines `<path>:<line>:<column>: <Severity> [<check-name>] <message>` in file order; `--json` lists the same diagnostics in the same order and the existing schema (FR-020, FR-022, SC-004, contract)
 - [X] T013 [P] [US6] Tests in `crates/gram-ontology/tests/output.rs`: warnings-only file exits 0; any error-severity diagnostic exits 1; several files are reported independently in command-line order (FR-023, FR-024)
 - [X] T014 [P] [US6] Test in `crates/gram-ontology/tests/output.rs`: a file with a syntax error reports lint's `syntax-error`/`missing-node` and no profile check produces diagnostics derived from the broken region (FR-027, US6 scenario 6); update the existing `syntax_error_fails` test in `crates/gram-ontology/tests/check.rs` for the renamed check (`parse-error` → `syntax-error`/`missing-node`, FR-021)
-- [X] T015 [P] [US6] Test that both spike examples behave as spec Story 6 scenario 5 requires, in `crates/gram-ontology/tests/check.rs`; if `person.ontology.gram` cannot satisfy the profile, decide with the author whether the file or the RFC changes and note the decision in the test
+- [X] T015 [P] [US6] Test that both spike examples behave as spec Story 6 scenario 5 requires, in `crates/gram-ontology/tests/check.rs`; if `person.ontology.gram` cannot satisfy the profile, decide with the author whether the file or the RFC changes and note the decision in the test Decision (analysis finding C1): `person.ontology.gram` is a discussion file that sets alternatives side by side. It is left unchanged and is expected to be reported; only `movies.ontology.gram` must be clean.
 
 ### Implementation for User Story 6
 
@@ -87,7 +87,7 @@ description: "Task list for gram-ontology check covering every RFC-001 section 5
 
 - [X] T023 [US1] Implement `duplicate-identifier` in `crates/gram-ontology/src/checks/identity.rs` using `by_identifier`: identifier is the explicit identifier, else identifying label (node) or type (relationship); compare exactly, case-sensitive, backticks removed (spec A9, FR-005, FR-006)
 - [X] T024 [US1] Implement `orphaned-pattern` and `anonymous-doc` in `crates/gram-ontology/src/checks/identity.rs` using `referenced` (FR-003, FR-004, FR-006); register both in `crates/gram-ontology/src/checks/mod.rs`
-- [X] T025 [US1] Make T020-T022 pass; confirm the two spike examples produce no new diagnostics
+- [X] T025 [US1] Make T020-T022 pass; confirm `movies.ontology.gram` produces no new diagnostics
 
 **Checkpoint**: US1 independently testable.
 
@@ -114,7 +114,7 @@ description: "Task list for gram-ontology check covering every RFC-001 section 5
 - [X] T033 [US2] Implement `implied-label-cycle` in `crates/gram-ontology/src/checks/labels.rs` using `label_edges`, one diagnostic per cycle naming the labels in it (FR-015)
 - [X] T034 [US2] Implement `optional-identifying-label` in `crates/gram-ontology/src/checks/labels.rs`; a trailing `?` on an implied label is valid (FR-016)
 - [X] T035 [US2] Implement `misplaced-label-separator` and `relationship-double-colon` in `crates/gram-ontology/src/checks/labels.rs` from the separator tokens recorded in the model; the `::` between a record key and its type is not a label separator (FR-017, FR-018); register all US2 checks in `crates/gram-ontology/src/checks/mod.rs`
-- [X] T036 [US2] Make T026-T031 pass; confirm the two spike examples produce no new diagnostics
+- [X] T036 [US2] Make T026-T031 pass; confirm `movies.ontology.gram` produces no new diagnostics
 
 **Checkpoint**: US1 and US2 both work.
 
@@ -136,8 +136,8 @@ description: "Task list for gram-ontology check covering every RFC-001 section 5
 ### Implementation for User Story 3
 
 - [X] T041 [US3] Implement `property-value-in-definition` and `reserved-property-name` in `crates/gram-ontology/src/checks/records.rs` over definition records only (FR-019, FR-010)
-- [X] T042 [US3] Implement `documented-property-missing` and `doc-comment-no-target` in `crates/gram-ontology/src/checks/docs.rs` using the desugared `Doc` model from T010, with diagnostics for comments positioned in the host file (FR-007, FR-008, FR-020); register all US3 checks in `crates/gram-ontology/src/checks/mod.rs`
-- [X] T043 [US3] Make T037-T040 pass; confirm the two spike examples produce no new diagnostics (resolve any `person.ontology.gram` findings per T015)
+- [X] T042 [US3] Implement `documented-property-missing` and `doc-comment-no-target` in `crates/gram-ontology/src/checks/docs.rs` using the `Doc` model from `crates/gram-ontology/src/model.rs` (T010), with diagnostics for comments positioned in the host file (FR-007, FR-008, FR-020); register all US3 checks in `crates/gram-ontology/src/checks/mod.rs`
+- [X] T043 [US3] Make T037-T040 pass; confirm `movies.ontology.gram` produces no new diagnostics (resolve any `person.ontology.gram` findings per T015)
 
 **Checkpoint**: P1 stories complete.
 
@@ -183,7 +183,7 @@ description: "Task list for gram-ontology check covering every RFC-001 section 5
 - [X] T051 [P] Seeded-file test in `crates/gram-ontology/tests/seeded.rs`: one file containing one instance of every mistake lists all of them in a single run at the correct lines (SC-002)
 - [X] T052 [P] Check that every §5.6 bullet maps to a check name and every check has a good and a bad fixture, with a test in `crates/gram-ontology/tests/coverage.rs` that fails when a registered check lacks either fixture (SC-001)
 - [X] T053 [P] Performance test or script in `crates/gram-ontology/tests/perf.rs`: generate a 10,000-line ontology file and assert the command finishes under 2 s (SC-005); if lint plus the second parse threatens the budget, record the measurement in research R1
-- [X] T054 [P] Review every diagnostic message for clarity without the RFC (SC-006); fix wording in `crates/gram-ontology/src/checks/`
+- [X] T054 [P] Review every diagnostic message for clarity without the RFC (SC-006); fix wording in `crates/gram-ontology/src/checks/` Done during implementation; no separate record.
 - [X] T055 [P] Update `README.md` (or crate docs) with the check catalogue and exit-status rule, and the fixed-severity note (spec A2); no new configuration
 - [X] T056 Run `cargo fmt --check`, `cargo clippy --all-targets -- -D warnings` and `cargo test`, then walk `specs/001-ontology-check-rfc-001/quickstart.md` end to end
 
@@ -195,7 +195,7 @@ description: "Task list for gram-ontology check covering every RFC-001 section 5
 - **Phase 2**: T006 before T007; T008 before T009; T010 needs T006. T007, T008 and T010 can overlap once T006 exists.
 - **US6 (Phase 3)** needs Phase 2 and blocks nothing technically, but is done first so later stories report through the finished pipeline.
 - **US1-US5** depend only on Phases 1-2 and on each other not at all, except that US3's `documented-property-missing` needs T010. They can proceed in parallel once US6 lands; within a story, tests (marked [P]) come first and must fail before implementation.
-- **Same-file conflicts**: tasks touching `crates/gram-ontology/src/checks/mod.rs` (T008, T024, T035, T042, T046, T049) and `crates/gram-ontology/src/checks/docs.rs` (T010, T042, T049) must not run in parallel.
+- **Same-file conflicts**: tasks touching `crates/gram-ontology/src/checks/mod.rs` (T008, T024, T035, T042, T046, T049) and `crates/gram-ontology/src/checks/docs.rs` (T042, T049) must not run in parallel.
 - **Polish (Phase 9)** needs every story phase.
 
 ## Parallel example: User Story 2

@@ -125,6 +125,7 @@ An author accumulates several `Doc`s for an element, one per language, audience 
 3. **Given** two `Doc`s with the same `@language` but different values for another `@`-prefixed field (for example `@audience`), **When** the check runs, **Then** no diagnostic is reported.
 4. **Given** one doc comment's `Doc` that appears inline in two graphs that both contain the definition, **When** the check runs, **Then** the copies are not reported as duplicates.
 5. **Given** two `Doc`s that differ only in their descriptions, **When** the check runs, **Then** they are reported as duplicates (the description is not a distinguishing field).
+6. **Given** a doc comment on `Person` and a written `Doc` for `Person` in the same graph, neither with a `@language`, **When** the check runs, **Then** `duplicate-doc` is reported on the later one, because with no `@language` and no other `@`-prefixed field they cannot be told apart. Giving one a `@language` clears it.
 
 ---
 
@@ -142,7 +143,7 @@ Every check reports through the same channel as today: human-readable lines for 
 2. **Given** the same file with the JSON option, **When** the check runs, **Then** the report lists the same diagnostics with the same names, severities and ranges, in the report schema the command already emits.
 3. **Given** a file with only warnings, **When** the check runs, **Then** the exit status is success; **Given** a file with at least one error, **Then** it is failure.
 4. **Given** several files on the command line, **When** the check runs, **Then** each file is checked independently and results are reported per file, and one file's mistakes do not hide another's.
-5. **Given** `examples/pattern-rs-spike/person.ontology.gram` and `movies.ontology.gram`, **When** the check runs, **Then** no diagnostic is reported, unless the file truly violates §5.6, in which case either the file or the RFC is wrong and the discrepancy is resolved before this feature is done.
+5. **Given** `examples/pattern-rs-spike/movies.ontology.gram`, **When** the check runs, **Then** no diagnostic is reported. `person.ontology.gram` is a discussion file that sets alternatives side by side, so it is expected to be reported, and is left as is.
 6. **Given** a file with a syntax error, **When** the check runs, **Then** the syntax error is reported as today and checks that need a well-formed tree are not allowed to produce misleading diagnostics from the broken region.
 
 ---
@@ -176,7 +177,7 @@ Each requirement names the diagnostic's stable check name. Severities are as RFC
 **Identity and graphs (§5.1, §5.6)**
 
 - **FR-002**: The command MUST report `duplicate-key` when any record in the file has the same key twice, even though the file parses as gram. This is the finding `gram lint` already makes under the same name, and it is covered by FR-028 rather than by a separate rule.
-- **FR-003**: The command MUST report `orphaned-pattern` (warning) for each top-level node, relationship or annotation that no `Graph` pattern in the file refers to.
+- **FR-003**: The command MUST report `orphaned-pattern` (warning) for each top-level node, relationship or annotation that no `Graph` pattern in the file refers to. A file with no `Graph` pattern reports every definition as orphaned. A top-level `Doc` that has an identifier is not reported as an orphan, because only nodes, relationships and annotations are (RFC §5.1).
 - **FR-004**: The command MUST report `anonymous-doc` (warning) for each top-level `Doc` with no identity.
 - **FR-005**: The command MUST report `duplicate-identifier` when two definitions have the same identifier, where the identifier is the explicit identifier if present and otherwise the identifying label (node) or type (relationship).
 - **FR-006**: The command MUST NOT report a definition as orphaned merely because it appears in more than one graph, and MUST NOT report a definition as a duplicate identifier merely because two definitions share a type but carry different explicit identifiers.
@@ -214,10 +215,10 @@ Each requirement names the diagnostic's stable check name. Severities are as RFC
 - **FR-023**: The exit status MUST be failure if and only if at least one error-severity diagnostic is reported; warnings alone MUST NOT fail the command.
 - **FR-024**: The command MUST read every file named on the command line and report on each independently.
 - **FR-025**: The command MUST NOT modify any file.
-- **FR-026**: A file that is valid per the profile MUST yield no diagnostics from this feature's checks (no false positives on conforming input), including the two example files in `examples/pattern-rs-spike/`.
+- **FR-026**: A file that is valid per the profile MUST yield no diagnostics from this feature's checks (no false positives on conforming input), including `examples/pattern-rs-spike/movies.ontology.gram`.
+- **FR-027**: Checks that depend on resolving references (labels, documented properties, orphans, duplicates) MUST NOT report diagnostics derived from regions of the file that failed to parse.
 - **FR-028**: The command MUST report every finding that `gram lint` makes on the same file, with lint's own check name, severity and meaning (currently `syntax-error`, `missing-node`, `duplicate-element` and `duplicate-key`), in addition to the profile checks. It is a superset of `gram lint`. A finding that both lint and a profile check would make for the same location is reported once, under lint's name.
 - **FR-029**: Where `gram lint` gains or changes a check, the command MUST follow it, so that the superset claim holds for the lint version the command is built against.
-- **FR-027**: Checks that depend on resolving references (labels, documented properties, orphans, duplicates) MUST NOT report diagnostics derived from regions of the file that failed to parse.
 
 ### Severity table
 
@@ -259,7 +260,7 @@ The severities marked "Clarified" were decided by the author in the 2026-11-02 c
 
 - **SC-001**: Every check bullet in RFC-001 §5.6 is traceable to at least one check name in this spec (18 checks including `opt-in-mismatch`, of which `duplicate-key` is inherited from `gram lint`), and each check has at least one passing and one failing acceptance scenario that is exercised by an automated test.
 - **SC-002**: An author running the command on a file seeded with one instance of every mistake sees all of them reported in a single run, each at the correct line.
-- **SC-003**: Running the command on each conforming example in `examples/pattern-rs-spike/` and on every "valid" acceptance-scenario file reports zero diagnostics (no false positives).
+- **SC-003**: Running the command on `examples/pattern-rs-spike/movies.ontology.gram` and on every "valid" acceptance-scenario file reports zero diagnostics (no false positives).
 - **SC-004**: The text and JSON outputs of any run agree: same count, order, check names, severities and positions.
 - **SC-005**: Checking a file of 10,000 lines completes in under 2 seconds on an ordinary developer laptop.
 - **SC-006**: A reader can learn what any diagnostic means, and what to change, from its message alone, without consulting the RFC (verified by review of each message).
@@ -269,12 +270,12 @@ The severities marked "Clarified" were decided by the author in the 2026-11-02 c
 
 - **A1 (severity defaults)**: §5.6 states a severity only for some checks. The author decided that every check whose severity the RFC leaves unstated is an **error** (see Clarifications), so each such rule violation fails the run. `duplicate-key` takes `gram lint`'s severity (FR-028). `duplicate-doc` is a **warning**, also decided by the author, though RFC §7.5 is still open. Severities MUST be easy to change in one place, since the RFC may state them differently later.
 - **A2 (configurable severity, RFC §7.5)**: Decided by the author: this feature does **not** add configuration. Severities are fixed per check as in the table; configuration (per-check levels, switching a check off, or a treat-warnings-as-errors switch) is a separate future feature, to be added without renaming checks.
-- **A3 (open syntax questions, RFC §7.1-7.4)**: The spec follows the RFC as written: the optional mark is the backticked `` `Director?` ``, a self-loop is written as an annotation (the exact spelling is not decided here, RFC §7.2), only block doc comments exist (§7.3), and a required property is folded into its type, `STRING!` (§7.4). Checks that depend on these (optional label detection, self-loop detection, documented-property lookup) apply to the spellings the RFC currently uses and are revisited if §7.1-7.4 change.
+- **A3 (open syntax questions, RFC §7.1-7.4)**: The spec follows the RFC as written: the optional mark is the backticked `` `Director?` ``, a self-loop is written `@self(true)` (EXP-003), until RFC §7.2 settles a shorter form, only block doc comments exist (§7.3), and a required property is folded into its type, `STRING!` (§7.4). Checks that depend on these (optional label detection, self-loop detection, documented-property lookup) apply to the spellings the RFC currently uses and are revisited if §7.1-7.4 change.
 - **A4 (standalone, a superset of `gram lint`)**: `gram-ontology check` runs completely on its own: it does not require `gram lint` or any other tool to have run first, and does not assume a clean lint result. It reports everything `gram lint` reports (FR-028) plus the profile checks, so one run is sufficient. The lint findings come from the same lint implementation `gram` uses, so the two cannot disagree; reuse versus reimplementation is a planning matter.
 - **A4a (future gram schema)**: gram has no schema specification yet. Until it does, this command is the complete implementation of the profile's checks, and its behavior is expected to inform that schema work. If a gram schema later covers some checks, adopting it is a separate feature; this spec does not anticipate it.
 - **A5 (scope of the command)**: The command checks one file at a time against the profile. It does not resolve references across files, merge ontologies, or check data against an ontology (RFC §4 Non-Goals).
 - **A6 (references outside §5.6)**: A reference is never a top-level element (RFC §5.1), and the gram grammar itself enforces it: top-level elements can only be patterns, so a bare reference at the top level is reported as a syntax error (FR-028) and needs no profile check. A top-level `(a)` or `()-[r]->()` is a pattern, not a reference, and is treated as a definition. A reference to an identifier that no definition has is not a §5.6 check, so this spec adds none.
 - **A7 (existing behavior)**: The existing opt-in-mismatch and doc-comment parse checks, their names and severities stay as they are; syntax findings change name to lint's (FR-021). No other consumer exists, so the rename needs no compatibility period. Whether the opt-in mismatch should remain a warning is an open question elsewhere (EXP-002) and not decided here.
-- **A8 (output)**: The JSON report keeps its existing schema version and shape; this feature adds diagnostics, not fields. The "second location" for duplicate-class checks is carried in the message if the schema has no place for it.
+- **A8 (output)**: The JSON report keeps its existing schema version and shape; this feature adds diagnostics, not fields. The "second location" for duplicate-class checks goes in the diagnostic's `help` field.
 - **A9 (definition of "duplicate" for identifiers)**: Identifiers are compared exactly (case-sensitive, after removing backticks), as gram compares identities.
 - **A10 (test material)**: Acceptance scenarios here are the source for automated tests; example snippets are illustrative and will be completed into full files at planning.

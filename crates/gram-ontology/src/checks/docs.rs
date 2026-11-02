@@ -44,7 +44,14 @@ pub fn check(model: &Model, out: &mut Vec<Diagnostic>) {
     }
 
     let mut seen: BTreeMap<DocKey, usize> = BTreeMap::new();
-    for (i, doc) in model.docs.iter().enumerate() {
+    // Compare in file order, so the later of two is the one reported.
+    let mut order: Vec<usize> = (0..model.docs.len()).collect();
+    order.sort_by_key(|&i| {
+        let r = &model.docs[i].range;
+        (r.start.line, r.start.character)
+    });
+    for i in order {
+        let doc = &model.docs[i];
         let Some(target) = &doc.target else { continue };
         let fields: Vec<(String, String)> = doc
             .fields

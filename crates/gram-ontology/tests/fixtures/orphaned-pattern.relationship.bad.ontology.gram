@@ -1,0 +1,8 @@
+{ kind: "ontology" }
+
+(Person)
+(Movie)
+(Person)=[ACTED_IN]=>(Movie)
+@unique(title)
+(Show { title:: "STRING" })
+[g:Graph | Person, Movie]

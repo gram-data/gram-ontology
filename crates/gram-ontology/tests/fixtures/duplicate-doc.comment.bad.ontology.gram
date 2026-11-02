@@ -1,0 +1,7 @@
+{ kind: "ontology" }
+
+/** A person. */
+(Person)
+[g:Graph | Person,
+  [:Doc { `@description`: md`Another.` } | Person]
+]

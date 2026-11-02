@@ -11,6 +11,13 @@ fn cardinality_length_mismatch() {
     );
     // Arity two and arity three, the latter under a second annotation.
     assert_clean("cardinality-length-mismatch.good");
+    // Two ranges for three pattern elements.
+    assert_only(
+        "cardinality-length-mismatch.arity3.bad",
+        "cardinality-length-mismatch",
+        "error",
+        "@cardinality",
+    );
 }
 
 #[test]

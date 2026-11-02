@@ -35,6 +35,13 @@ fn doc_comment_no_target() {
 #[test]
 fn duplicate_doc() {
     assert_only("duplicate-doc.bad", "duplicate-doc", "warning", "md`b`");
+    // A doc comment's Doc and a written Doc, neither with a `@language`, cannot be told apart.
+    assert_only(
+        "duplicate-doc.comment.bad",
+        "duplicate-doc",
+        "warning",
+        "Another",
+    );
     // Different language, different audience, one comment copied into two graphs.
     assert_clean("duplicate-doc.good");
 }
