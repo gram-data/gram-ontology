@@ -63,7 +63,7 @@ Where one name cannot serve as the identity, an element takes an explicit identi
 
 The profile reads the double colon as its mark for a declaration, which plain gram accepts wherever it accepts a single colon and reads the same. On a node, `::` directly after the identifier declares that the identifier is also the identifying label (5.4). In a definition's record, `::` declares a property and its type (5.5). A single colon in either place keeps its plain gram reading.
 
-A reference to an element is its bare identifier, written among another pattern's elements, and a reference is never a top-level element. A file holds any number of `Graph` patterns, each a pattern whose elements list the graph's members by identity. An element may belong to several graphs, since a definition is shared by nature. A top-level node, relationship or annotation that no graph refers to is orphaned, which is a warning, as is a top-level `Doc` with no identity.
+A reference to an element is its bare identifier, written among another pattern's elements, and a reference is never a top-level element. A reference to an identifier that no definition has is an error (5.6). A file holds any number of `Graph` patterns, each a pattern whose elements list the graph's members by identity. An element may belong to several graphs, since a definition is shared by nature. A top-level node, relationship or annotation that no graph refers to is orphaned, which is a warning, as is a top-level `Doc` with no identity.
 
 ### 5.2 Meaning as an accumulating `Doc`
 
@@ -109,19 +109,22 @@ A node or relationship declares its properties in its record, one entry per prop
 
 ### 5.6 Checks
 
-A tool conforming to the profile reports, beyond syntax:
+A tool conforming to the profile reports, beyond syntax, the checks below. Each is an error unless it is marked a warning. An error means the file does not conform, and a warning means it conforms but is likely to be wrong. Whether severities can be configured is open (7.5).
 
-- a mismatch between the file name and `kind`;
-- a repeated key in a record, which gram parses but does not accept as a record;
-- orphaned top-level patterns and top-level `Doc`s without an identity;
+- a mismatch between the file name and `kind` (warning);
+- a repeated key in a record, which gram parses but does not accept as a record (`gram lint` also reports it as an error, but the profile states its own severity and does not follow lint's);
+- orphaned top-level patterns (warning) and top-level `Doc`s without an identity (warning);
 - a documented property that does not exist on the element, and a doc comment that has no target;
+- a reference to an identifier that no definition has, whether in a `Graph`'s elements, a `Doc` or an annotation;
 - a cardinality whose length differs from the number of pattern elements, and a self-loop declared where the relationship's ends are not the same node;
-- an implied label with no definition, a cycle among implied labels, and a trailing `?` on an identifying label;
-- a node label separator `::` that does not directly follow the node's identifier, and a `::` before a relationship's type;
-- an implied label that matches more than one definition's identifying label;
-- a `key: value` entry, with a single colon, in a node or relationship definition's record;
+- an implied label with no definition (warning), a cycle among implied labels, and a trailing `?` on an identifying label;
+- a node label separator `::` that does not directly follow the node's identifier (warning), and a `::` before a relationship's type;
+- an implied label that matches more than one definition's identifying label (warning);
+- a `key: value` entry, with a single colon, in a node or relationship definition's record (warning);
 - a property name beginning with `@`, and two definitions with the same identifier;
-- two `Doc`s that cannot be told apart: for one element in one graph, the same `@language` and the same values for every other `@`-prefixed field except the description, labels and property entries. Copies of one comment's `Doc` in different graphs, and `Doc`s that differ by audience or version, are not duplicates.
+- two `Doc`s that cannot be told apart (warning, pending 7.5): for one element in one graph, the same `@language` and the same values for every other `@`-prefixed field except the description, labels and property entries. Copies of one comment's `Doc` in different graphs, and `Doc`s that differ by audience or version, are not duplicates.
+
+A reference to an identifier that no definition has is an error because nothing else reports it, and the `Doc` or annotation that names it silently describes nothing. After `(Person)=[ownsCar:OWNS]=>(Car)` is written with an explicit identifier, `OWNS` is only a type, so `[:Doc {...} | OWNS]` refers to no definition, and the description it carries is attached to nothing.
 
 ## 6. Alternatives Considered
 
@@ -146,4 +149,4 @@ A tool conforming to the profile reports, beyond syntax:
 
 7.4. Whether a required property stays folded into its type (`STRING!`) or becomes a separate constraint, as the spec keeps them.
 
-7.5. Whether `Doc`s that cannot be told apart are a warning or an error, and whether the checks in 5.6 are configurable in severity.
+7.5. Whether `Doc`s that cannot be told apart stay a warning or become an error, and whether the severities in 5.6 are configurable.
