@@ -109,10 +109,10 @@ A node or relationship declares its properties in its record, one entry per prop
 
 ### 5.6 Checks
 
-A tool conforming to the profile reports, beyond syntax, the checks below. Each is an error unless it is marked a warning, except that a repeated record key takes the severity `gram lint` gives it. An error means the file does not conform, and a warning means it conforms but is likely to be wrong. Whether severities can be configured is open (7.5).
+A tool conforming to the profile reports, beyond syntax, the checks below. Each is an error unless it is marked a warning. An error means the file does not conform, and a warning means it conforms but is likely to be wrong. Whether severities can be configured is open (7.5).
 
 - a mismatch between the file name and `kind` (warning);
-- a repeated key in a record, which gram parses but does not accept as a record;
+- a repeated key in a record, which gram parses but does not accept as a record (`gram lint` also reports it as an error, but the profile states its own severity and does not follow lint's);
 - orphaned top-level patterns (warning) and top-level `Doc`s without an identity (warning);
 - a documented property that does not exist on the element, and a doc comment that has no target;
 - a reference to an identifier that no definition has, whether in a `Graph`'s elements, a `Doc` or an annotation;
@@ -124,7 +124,7 @@ A tool conforming to the profile reports, beyond syntax, the checks below. Each 
 - a property name beginning with `@`, and two definitions with the same identifier;
 - two `Doc`s that cannot be told apart (warning, pending 7.5): for one element in one graph, the same `@language` and the same values for every other `@`-prefixed field except the description, labels and property entries. Copies of one comment's `Doc` in different graphs, and `Doc`s that differ by audience or version, are not duplicates.
 
-A reference to an identifier with no definition is an error because it leaves the element it was meant to describe or group unmentioned without any sign: after `(Person)=[ownsCar:OWNS]=>(Car)` is written with an explicit identifier, `[:Doc {...} | OWNS]` refers to nothing.
+A reference to an identifier that no definition has is an error because nothing else reports it, and the `Doc` or annotation that names it silently describes nothing. After `(Person)=[ownsCar:OWNS]=>(Car)` is written with an explicit identifier, `OWNS` is only a type, so `[:Doc {...} | OWNS]` refers to no definition, and the description it carries is attached to nothing.
 
 ## 6. Alternatives Considered
 
