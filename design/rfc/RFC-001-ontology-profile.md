@@ -57,7 +57,9 @@ A doc comment, the natural place to write a description, is discarded by the gen
 
 ### 5.1 The profile and its identities
 
-A file opts in by both its name and its `kind: ontology` record, and a mismatch between them is a warning. An ontology is a graph about kinds of things, so in the profile an element's identity is the name it is known by: a node's identifier is its identifying label, and a relationship's identifier is its type. `(Person)` is the identifier and the label at once, and the label is not written twice. An identifier is unique within a file, so a node and a relationship cannot share a name, and a relationship type has one definition. A type used between different pairs of nodes, such as `OWNS` from both `Person` and `Company` to `Car`, is therefore not yet expressible by default (see 7.6). In plain gram an identity is only an identity, and this convention belongs to the profile.
+A file opts in by both its name and its `kind: ontology` record, and a mismatch between them is a warning. An ontology is a graph about kinds of things, so by default an element's identity is the name it is known by: a node's identifier is its identifying label, and a relationship's identifier is its type. `(Person)` is the identifier and the label at once, and the label is not written twice. An identifier is unique within a file.
+
+Where one name cannot serve as the identity, an element takes an explicit identifier written in plain gram's own form, `identifier:Label`. A relationship type used between different pairs of nodes needs one for each definition, `(Person)=[ownsCar:OWNS]=>(Car)` and `(Company)=[ownsFleet:OWNS]=>(Car)`, as does a node and a relationship that share a name. References, `Doc`s and annotations then use the identifier, so `[:Doc {...} | ownsCar]` documents one of the two definitions. Without an explicit identifier a second definition with the same type is a duplicate identifier (see 5.6). In plain gram an identity is only an identity, and this convention belongs to the profile.
 
 A reference to an element is its bare identifier, written among another pattern's elements, and a reference is never a top-level element. A file holds any number of `Graph` patterns, each a pattern whose elements list the graph's members by identity. An element may belong to several graphs, since a definition is shared by nature. A top-level node, relationship or annotation that no graph refers to is orphaned, which is a warning, as is a top-level `Doc` with no identity.
 
@@ -92,7 +94,7 @@ Documentation is an extra reference to a definition, and an annotation is part o
 
 ### 5.4 Labels
 
-The identifier is the identifying label. Any other label on a node is implied, meaning every node of the kind has it, and the double colon is the preferred separator: `(Actor::Person)` says every actor is a person. A label that only some nodes have is optional and ends in `?`, which for now is written inside backticks, `` `Director?` ``. A label with a trailing `?` is always optional, and the identifying label cannot be. A label that matches a defined node is a reference to that definition, and an implied label that matches none is a warning. A relationship end is the reference and needs no separate label. Any label may be documented where it is used, in the `Doc`'s `@labels` map, keyed by the label name without its `?`.
+The identifier is the identifying label unless the node has an explicit one. `(x:X)` is plain gram, an identifier `x` and the identifying label `X`, and `(X::Y)` is the special case in which the identifier does double duty as the identifying label. Any other label on a node is implied, meaning every node of the kind has it, and follows the double colon: `(Actor::Person)` says every actor is a person. A relationship has one type and no implied labels, so `::` is not used on one, and `[ownsCar:OWNS]` reads as identifier and type. A label that only some nodes have is optional and ends in `?`, which for now is written inside backticks, `` `Director?` ``. A label with a trailing `?` is always optional, and the identifying label cannot be. A label that matches a defined node is a reference to that definition, and an implied label that matches none is a warning. A relationship end is the reference and needs no separate label. Any label may be documented where it is used, in the `Doc`'s `@labels` map, keyed by the label name without its `?`.
 
 ### 5.5 Properties, constraints and model metadata
 
@@ -139,5 +141,3 @@ A tool conforming to the profile reports, beyond syntax:
 7.4. Whether a required property stays folded into its type (`STRING!`) or becomes a separate constraint, as the spec keeps them.
 
 7.5. Whether `Doc`s that cannot be told apart are a warning or an error, and whether the checks in 5.6 are configurable in severity.
-
-7.6. How to define a relationship type used between several pairs of nodes, and a node and relationship that share a name. Candidates: an explicit identifier distinct from the label or type for the definitions that need one, as plain gram already allows, or a qualified identifier.
