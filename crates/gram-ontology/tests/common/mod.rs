@@ -10,6 +10,10 @@ pub struct Diag {
     pub severity: String,
     /// 1-based line.
     pub line: u32,
+    /// 0-based start column, and the 0-based end line and column.
+    pub col: u32,
+    pub end_line: u32,
+    pub end_col: u32,
 }
 
 pub fn fixture_path(name: &str) -> PathBuf {
@@ -34,6 +38,9 @@ pub fn run_path(path: &std::path::Path) -> (i32, Vec<Diag>) {
             rule: d["rule"].as_str().unwrap().into(),
             severity: d["severity"].as_str().unwrap().into(),
             line: d["range"]["start"]["line"].as_u64().unwrap() as u32 + 1,
+            col: d["range"]["start"]["character"].as_u64().unwrap() as u32,
+            end_line: d["range"]["end"]["line"].as_u64().unwrap() as u32,
+            end_col: d["range"]["end"]["character"].as_u64().unwrap() as u32,
         })
         .collect();
     (out.status.code().unwrap(), diags)

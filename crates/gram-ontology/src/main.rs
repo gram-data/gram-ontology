@@ -100,6 +100,9 @@ fn check(files: &[PathBuf], json: bool) -> ExitCode {
                     d.rule,
                     d.message
                 );
+                if let Some(help) = &d.help {
+                    println!("  help: {help}");
+                }
             }
         }
     }

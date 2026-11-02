@@ -29,12 +29,24 @@ fn text_lines(path: &std::path::Path) -> Vec<String> {
         .collect()
 }
 
+/// The diagnostic lines, without the indented `help:` lines that follow some of them.
+fn diagnostic_lines(lines: &[String]) -> Vec<&String> {
+    lines.iter().filter(|l| !l.starts_with("  help:")).collect()
+}
+
 #[test]
 fn text_lines_have_file_line_column_severity_name_and_message_in_file_order() {
     let dir = tempfile::tempdir().unwrap();
     let path = write(&dir, "several.ontology.gram", SEVERAL);
-    let lines = text_lines(&path);
-    assert_eq!(lines.len(), 3, "{lines:?}");
+    let all = text_lines(&path);
+    let lines = diagnostic_lines(&all);
+    assert_eq!(lines.len(), 3, "{all:?}");
+    // `orphaned-pattern` carries a help line, printed right after it.
+    let orphan = all
+        .iter()
+        .position(|l| l.contains("[orphaned-pattern]"))
+        .unwrap();
+    assert!(all[orphan + 1].starts_with("  help: "), "{all:?}");
     let prefix = path.display().to_string();
     assert!(
         lines[0].starts_with(&format!("{prefix}:2:")) && lines[0].contains("Error [duplicate-key]")
@@ -54,7 +66,8 @@ fn json_and_text_agree() {
     let dir = tempfile::tempdir().unwrap();
     let path = write(&dir, "several.ontology.gram", SEVERAL);
     let (_, diags) = run_path(&path);
-    let lines = text_lines(&path);
+    let all = text_lines(&path);
+    let lines = diagnostic_lines(&all);
     assert_eq!(diags.len(), lines.len());
     for (d, l) in diags.iter().zip(&lines) {
         assert!(l.contains(&format!("[{}]", d.rule)), "{l}");

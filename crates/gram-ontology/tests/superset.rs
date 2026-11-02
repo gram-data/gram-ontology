@@ -31,9 +31,13 @@ fn every_lint_diagnostic_is_reported() {
             let sev = format!("{:?}", l.severity).to_lowercase();
             let line = l.range.start.line + 1;
             assert!(
-                ours.iter()
-                    .any(|d| d.rule == l.rule && d.severity == sev && d.line == line),
-                "{}: lint's {} at line {line} is missing from {ours:?}",
+                ours.iter().any(|d| d.rule == l.rule
+                    && d.severity == sev
+                    && d.line == line
+                    && d.col == l.range.start.character
+                    && d.end_line == l.range.end.line
+                    && d.end_col == l.range.end.character),
+                "{}: lint's {} at line {line} (range preserved) is missing from {ours:?}",
                 path.display(),
                 l.rule
             );
