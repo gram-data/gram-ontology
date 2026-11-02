@@ -5,7 +5,7 @@
  * @property name The full name of the person.
  */
 (Person {
-    name: "STRING!"
+    name:: "STRING!"
 })
 
 // Don't do this...

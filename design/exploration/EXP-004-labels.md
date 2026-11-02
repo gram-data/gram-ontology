@@ -119,6 +119,7 @@ Settled:
 - **The optional marker:** the backtick form, `` `Director?` ``, for now. A grammar change for a terminating `?` is considered only if review pushes back.
 - **Reading the backtick form:** every other tool sees the `?` as part of the label, which is acceptable. In an ontology file a label with a trailing `?` is always optional, so a label genuinely named that way is not allowed.
 - **The `label` shorthand:** not needed, since the identifier already names the identifying label.
+- **Superseded by RFC-001:** this exploration treats `::` as only stylistic and `(Actor::Person)` as the one form. RFC-001 5.4 reserves `::` directly after a node's identifier as the shorthand for an identifier that is also the identifying label, and allows an explicit identifier with single colons, `(actor:Actor:Person)`. Where they differ, the RFC governs.
 
 ## 7. References
 
