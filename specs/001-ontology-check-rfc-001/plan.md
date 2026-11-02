@@ -12,7 +12,7 @@ Extend the existing `gram-ontology check` command so that one run reports (a) ev
 
 **Language/Version**: Rust 1.96, edition 2021 (existing workspace)
 
-**Primary Dependencies**: `tree-sitter` 0.26, `tree-sitter-gram` 0.6, `tree-sitter-gramdoc` 0.2, `clap` 4.5 (existing); `gram-diagnostics` bumped 0.4 → 0.6; `gram-data` 0.6 added as a library dependency for `lint::lint_source` (see research R1)
+**Primary Dependencies**: `tree-sitter` 0.26, `tree-sitter-gram` 0.6 (0.6.1 is released and compatible), `clap` 4.5 (existing); `tree-sitter-gramdoc` bumped 0.2 → 0.3 (released; the repo is still on 0.2); `gram-diagnostics` bumped 0.4 → 0.6; `gram-data` 0.6 added as a library dependency for `lint::lint_source` (see research R1)
 
 **Storage**: N/A (reads files, writes only stdout)
 
@@ -53,7 +53,7 @@ specs/001-ontology-check-rfc-001/
 
 ```text
 crates/gram-ontology/
-├── Cargo.toml                # gram-diagnostics 0.6, gram-data 0.6
+├── Cargo.toml                # gram-diagnostics 0.6, gram-data 0.6, tree-sitter-gramdoc 0.3
 ├── src/
 │   ├── main.rs               # CLI, output, exit status (existing)
 │   ├── model.rs              # file model built once from the tree
