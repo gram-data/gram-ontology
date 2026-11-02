@@ -1,0 +1,13 @@
+{ kind: "ontology" }
+
+(Person)
+(Car)
+(Person)=[ownsCar:OWNS]=>(Car)
+
+/** A person who drives. */
+(Actor::Person)
+@note("annotated")
+[d:Doc { `@description`: "Who owns a car." } | ownsCar]
+[g:Graph | Person, Car, ownsCar, Actor, d
+]
+[g2:Graph | g]

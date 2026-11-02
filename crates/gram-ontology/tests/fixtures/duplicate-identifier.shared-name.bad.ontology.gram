@@ -1,0 +1,6 @@
+{ kind: "ontology" }
+
+(Follows)
+(Person)
+(Person)=[Follows]=>(Person)
+[g:Graph | Follows, Person]
