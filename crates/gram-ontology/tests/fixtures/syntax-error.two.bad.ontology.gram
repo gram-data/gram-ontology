@@ -1,0 +1,6 @@
+{ kind: "ontology" }
+
+(Actor)
+(Person)
+[g:Graph {name:"g"} | Actor?, Person]
+[h:Graph {name:"h"} | Person?, Actor]

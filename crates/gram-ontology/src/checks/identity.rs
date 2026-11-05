@@ -12,17 +12,17 @@ pub fn check(model: &Model, out: &mut Vec<Diagnostic>) {
             Some(&j) => out.push(diagnostic(
                 "duplicate-identifier",
                 format!(
-                    "`{}` is already the identifier of another definition; give one of them an explicit identifier, as in `{}`",
-                    def.identifier,
+                    "`{}` is already the identifier of another definition",
+                    def.identifier
+                ),
+                def.range.clone(),
+                Some(format!(
+                    "first defined at line {}; give one of them an explicit identifier, as in `{}`",
+                    line_of(&model.defs[j].range),
                     match def.kind {
                         Kind::Node => "actor:Actor",
                         Kind::Relationship => "ownsCar:OWNS",
                     }
-                ),
-                def.range.clone(),
-                Some(format!(
-                    "first defined at line {}",
-                    line_of(&model.defs[j].range)
                 )),
             )),
             None => {

@@ -42,7 +42,7 @@ fn duplicate_identifier_help_fits_the_definition() {
             .unwrap()
             .iter()
             .find(|d| d["rule"] == "duplicate-identifier")
-            .map(|d| d["message"].as_str().unwrap().to_string())
+            .map(|d| d["help"].as_str().unwrap().to_string())
             .expect("a duplicate-identifier diagnostic")
     };
     let head = "{ kind: \"ontology\" }\n";
