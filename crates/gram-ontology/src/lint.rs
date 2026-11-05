@@ -4,8 +4,23 @@
 use gram_data::lint::{lint_source, LintOptions};
 use gram_diagnostics::{Diagnostic, Range};
 
+/// Lint's findings, each reported once: a finding repeated with the same check, range and
+/// message (a syntax error can be raised twice at one position) is dropped.
 pub fn lint(source: &str) -> Vec<Diagnostic> {
-    lint_source(source, &LintOptions { strict: false })
+    dedupe(lint_source(source, &LintOptions { strict: false }))
+}
+
+fn dedupe(findings: Vec<Diagnostic>) -> Vec<Diagnostic> {
+    let mut out: Vec<Diagnostic> = Vec::new();
+    for d in findings {
+        if !out
+            .iter()
+            .any(|o| o.rule == d.rule && o.message == d.message && same_range(&o.range, &d.range))
+        {
+            out.push(d);
+        }
+    }
+    out
 }
 
 fn same_range(a: &Range, b: &Range) -> bool {
@@ -62,6 +77,13 @@ mod tests {
             code: None,
             help: None,
         }
+    }
+
+    #[test]
+    fn a_finding_repeated_at_one_position_is_kept_once() {
+        let a = diag("syntax-error", (4, 27), (4, 28));
+        let b = diag("syntax-error", (4, 40), (4, 41));
+        assert_eq!(dedupe(vec![a.clone(), a, b]).len(), 2);
     }
 
     #[test]

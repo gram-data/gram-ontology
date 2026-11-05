@@ -1,0 +1,10 @@
+{ kind: "ontology" }
+
+(Person)
+(Car)
+(Person)=[ownsCar:OWNS]=>(Car)
+[g:Graph | Person, Car, ownsCar, Prson,
+  [:Doc { `@description`: "Who owns a car." } | OWNS]
+]
+@note("annotated")
+[x:Doc { `@description`: "Misspelled." } | Persn]

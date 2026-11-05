@@ -26,6 +26,7 @@ pub const SEVERITIES: &[(&str, Severity)] = &[
     ("property-value-in-definition", Severity::Warning),
     ("duplicate-doc", Severity::Warning),
     ("duplicate-identifier", Severity::Error),
+    ("undefined-reference", Severity::Error),
     ("documented-property-missing", Severity::Error),
     ("doc-comment-no-target", Severity::Error),
     ("cardinality-length-mismatch", Severity::Error),

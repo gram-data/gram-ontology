@@ -2,6 +2,8 @@ use assert_cmd::Command;
 use predicates::prelude::*;
 use std::fs;
 
+mod common;
+
 fn spike(name: &str) -> String {
     format!(
         "{}/../../examples/pattern-rs-spike/{name}",
@@ -111,4 +113,34 @@ fn json_output_uses_the_gram_diagnostics_schema() {
         report["files"][0]["diagnostics"][0]["rule"],
         "opt-in-mismatch"
     );
+}
+
+#[test]
+fn a_syntax_error_is_reported_once() {
+    let (code, diags) = common::run_fixture("syntax-error.bad");
+    let errors: Vec<_> = diags.iter().filter(|d| d.rule == "syntax-error").collect();
+    assert_eq!(errors.len(), 1, "{diags:?}");
+    assert_eq!(
+        errors[0].line,
+        common::line_of("syntax-error.bad", "Actor?")
+    );
+    assert_eq!(code, 1);
+}
+
+#[test]
+fn two_different_syntax_errors_are_both_reported() {
+    let (code, diags) = common::run_fixture("syntax-error.two.bad");
+    let lines: Vec<u32> = diags
+        .iter()
+        .filter(|d| d.rule == "syntax-error")
+        .map(|d| d.line)
+        .collect();
+    assert_eq!(
+        lines,
+        [
+            common::line_of("syntax-error.two.bad", "Actor?"),
+            common::line_of("syntax-error.two.bad", "Person?"),
+        ]
+    );
+    assert_eq!(code, 1);
 }

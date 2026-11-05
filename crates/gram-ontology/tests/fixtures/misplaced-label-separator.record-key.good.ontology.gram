@@ -1,0 +1,4 @@
+{ kind: "ontology" }
+
+(Person { name:: cypher`STRING`, age:: cypher`INTEGER` })
+[g:Graph | Person]

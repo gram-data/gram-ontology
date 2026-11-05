@@ -137,6 +137,10 @@ pub struct Model {
     pub docs: Vec<Doc>,
     pub dangling_comments: Vec<Range>,
     pub referenced: BTreeSet<String>,
+    /// References written among a pattern's elements, with where they are written.
+    pub references: Vec<(String, Range)>,
+    /// Identifiers of `Graph` and `Doc` patterns, which a reference can also name.
+    pub pattern_identifiers: BTreeSet<String>,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -266,6 +270,7 @@ impl Builder<'_, '_> {
             "pattern_reference" => {
                 let name = name_of(inner, self.source);
                 if let Ctx::Graph(g) = ctx {
+                    self.model.references.push((name.clone(), range_of(inner)));
                     self.model.graphs[g].members.insert(name.clone());
                     if let Some(info) = info {
                         self.model.docs.push(Doc {
@@ -527,6 +532,11 @@ impl Builder<'_, '_> {
         );
         element_nodes.sort_by_key(|n| n.start_byte());
 
+        if matches!(first, Some("Graph") | Some("Doc")) {
+            if let Some((name, _)) = &ident {
+                self.model.pattern_identifiers.insert(name.clone());
+            }
+        }
         match first {
             Some("Graph") => {
                 let idx = self.model.graphs.len();
@@ -560,6 +570,14 @@ impl Builder<'_, '_> {
                     }
                     properties.extend(info.properties);
                 }
+                for n in element_nodes
+                    .iter()
+                    .filter(|n| n.kind() == "pattern_reference")
+                {
+                    self.model
+                        .references
+                        .push((name_of(*n, self.source), range_of(*n)));
+                }
                 let target = element_nodes
                     .iter()
                     .find(|n| n.kind() == "pattern_reference")
@@ -588,6 +606,14 @@ impl Builder<'_, '_> {
                         _ => None,
                     })
                     .collect();
+                for n in element_nodes
+                    .iter()
+                    .filter(|n| n.kind() == "pattern_reference")
+                {
+                    self.model
+                        .references
+                        .push((name_of(*n, self.source), range_of(*n)));
+                }
                 if ends.is_empty() {
                     if let Some(c) = comment {
                         self.model.dangling_comments.push(range_of(c));
@@ -788,6 +814,14 @@ mod tests {
         let m = model("(a)\n()-[r]->()");
         assert!(m.defs.iter().any(|d| d.identifier == "a"));
         assert!(m.defs.iter().any(|d| d.identifier == "r"));
+    }
+
+    #[test]
+    fn references_are_collected_from_graphs_docs_and_relationships() {
+        let m = model("(A)\n[g:Graph | A, B, [:Doc | C]]\n[:R | A, D]");
+        let names: Vec<&str> = m.references.iter().map(|(n, _)| n.as_str()).collect();
+        assert_eq!(names, ["A", "B", "C", "A", "D"]);
+        assert!(m.pattern_identifiers.contains("g"));
     }
 
     #[test]

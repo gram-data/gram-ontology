@@ -37,6 +37,7 @@ Same content and order as the text output, in the existing schema: `{ schema_ver
 | `property-value-in-definition` | warning | RFC §5.5 |
 | `duplicate-doc` | warning | clarified |
 | `duplicate-identifier` | error | clarified |
+| `undefined-reference` | error | RFC §5.6 (feature 002) |
 | `documented-property-missing` | error | clarified |
 | `doc-comment-no-target` | error | clarified |
 | `cardinality-length-mismatch` | error | clarified |

@@ -89,3 +89,16 @@ fn relationship_double_colon() {
     );
     assert_clean("relationship-double-colon.good");
 }
+
+#[test]
+fn misplaced_label_separator_ignores_the_record_key_double_colon() {
+    // `name:: cypher`STRING`` is a record entry, not a label separator.
+    assert_clean("misplaced-label-separator.record-key.good");
+    let (_, diags) = run_fixture("misplaced-label-separator.record-key.bad");
+    assert!(
+        diags.iter().all(|d| d.rule == "misplaced-label-separator"),
+        "{diags:?}"
+    );
+    let line = line_of("misplaced-label-separator.record-key.bad", "(actor:Actor::");
+    assert_eq!(diags.iter().map(|d| d.line).collect::<Vec<_>>(), [line]);
+}
